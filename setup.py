@@ -3,16 +3,6 @@
 
 from setuptools import setup, find_packages
 
-requirements = [
-    'numpy',
-    'dataclasses',
-    'tqdm'
-]
-
-test_requirements = [
-]
-
-setup(
     name='bananas',
     version='0.0.1',
     description='Framework for machine learning libraries',
@@ -23,7 +13,11 @@ setup(
     packages=find_packages(),
     package_data={'': ['../README.md', '**/*.csv']},
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=[
+        'numpy',
+        'dataclasses',
+        'tqdm'
+    ],
     license='MIT',
     zip_safe=False,
     keywords=['ML'],
@@ -36,5 +30,5 @@ setup(
         'Programming Language :: Python :: 3.7'
     ],
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=[]
 )
