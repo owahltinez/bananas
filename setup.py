@@ -4,19 +4,22 @@
 from setuptools import setup, find_packages
 
 requirements = [
-    'dataclasses', 'numpy', 'tqdm'
+    'numpy',
+    'dataclasses',
+    'tqdm'
 ]
 
-test_requirements = []
+test_requirements = [
+]
 
 setup(
     name='bananas',
     version='0.0.1',
-    description='Framework for ML libraries',
-    long_description='Framework for ML libraries',
-    author='omtinez',
-    author_email='omtinez@gmail.com',
-    url='https://gitlab.com/omtinez/bananas',
+    description='Framework for machine learning libraries',
+    long_description='Framework for machine learning libraries',
+    author='owahltinez',
+    author_email='oscar@wahltinez.org',
+    url='https://github.com/owahltinez/bananas',
     packages=find_packages(),
     package_data={'': ['../README.md', '**/*.csv']},
     include_package_data=True,
@@ -30,8 +33,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'
     ],
     test_suite='tests',
     tests_require=test_requirements
