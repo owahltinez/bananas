@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-
+setup(
     name='bananas',
     version='0.0.1',
     description='Framework for machine learning libraries',
