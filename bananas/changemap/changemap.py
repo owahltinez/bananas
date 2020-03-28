@@ -3,9 +3,10 @@ from typing import Dict, List
 
 class ChangeMap(object):
     '''
-    `ChangeMap` objects represent a modification of the feature set via addition or deletion of columns.
-    Reordering of columns is not a supported modification. Change maps come in handy when we have setup
-    a pipeline of transformers and estimators that may modify the feature set, for example:
+    `ChangeMap` objects represent a modification of the feature set via addition or deletion of
+    columns. Reordering of columns is not a supported modification. Change maps come in handy when
+    we have setup a pipeline of transformers and estimators that may modify the feature set, for
+    example:
 
     - [One-hot encoders](../transformers/encoders.html#bananas.transformers.encoders.OneHotEncoder)
       will convert a single feature into N categorical columns.
@@ -17,7 +18,8 @@ class ChangeMap(object):
     ## Pipelines
     Objects that are part of a [Pipeline](../core/pipeline.html#bananas.core.pipeline.Pipeline) are
     automatically chained so when one emits `on_output_shape_changed`, the corresponding object
-    downstream in the pipeline receives an `on_input_shape_changed` with the appropriate `ChangeMap`.
+    downstream in the pipeline receives an `on_input_shape_changed` with the appropriate
+    `ChangeMap`.
     '''
     def __init__(self, column_count: int, idx_del: List[int] = None, idx_add: List[int] = None):
         '''

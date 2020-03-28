@@ -8,6 +8,7 @@ the future, placeholder functions that can be overridden might be provided simil
 
 from enum import Enum, auto
 
+
 class LossFunction(Enum):
     ''' Enum declaring different types of loss function '''
 

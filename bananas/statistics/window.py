@@ -6,6 +6,7 @@ full-blown transformer.
 from typing import List
 from .basic import mean, median, variance
 
+
 class WindowStats:
     '''
     Keeps track of basic statistics using only the last `window_size` samples.

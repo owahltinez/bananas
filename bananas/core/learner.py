@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, Tuple
+from typing import Iterable, Tuple
 
 from ..changemap.mixins import InputChangeMixin
 from ..changemap.changemap import ChangeMap
@@ -52,8 +52,8 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
         attributes : str
             Attributes to verify for initialization
         '''
-        assert all([getattr(self, attr, None) is not None for attr in attributes]), ( \
-            'Required attributes not initialized: %r' % \
+        assert all([getattr(self, attr, None) is not None for attr in attributes]), (
+            'Required attributes not initialized: %r' %
             [attr for attr in attributes if getattr(self, attr, None) is None])
 
     def check_X(self, X: Iterable[Iterable], ensure_2d: bool = True, ensure_shape: bool = True,
@@ -126,7 +126,7 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
             # Check again to see if conversion was successful
             get_dtype = lambda i, fallback: self.input_dtype_.get(i, fallback) or fallback
             if hasattr(self, 'input_dtype_') and self.input_dtype_ and \
-                any([dtype != get_dtype(i, dtype) for i, dtype in input_dtype.items()]):
+                    any([dtype != get_dtype(i, dtype) for i, dtype in input_dtype.items()]):
                 raise TypeError('Input dtypes changed. Expected %r, found %r' %
                                 (self.input_dtype_, input_dtype))
             self.input_dtype_ = input_dtype

@@ -7,7 +7,7 @@ from ..changemap.changemap import ChangeMap
 from ..core.learner import Learner
 from ..dataset.dataset import DataSet
 from ..transformers.base import BaseTransformer
-from ..utils.arrays import  check_array
+from ..utils.arrays import check_array
 from ..utils.misc import valid_parameters
 
 
@@ -105,7 +105,7 @@ class Pipeline(Learner):
     def is_transformer_only(self):
         ''' Recursively query to check if this pipeline is made of only transformers '''
         for _, step in self.steps.items():
-            if not (isinstance(step, BaseTransformer) or \
+            if not (isinstance(step, BaseTransformer) or
                 (isinstance(step, Pipeline) and step.is_transformer_only())):
                 return False
         return True

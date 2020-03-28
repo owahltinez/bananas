@@ -9,6 +9,7 @@ from ..utils import __NUMPY_AVAILABLE__
 if __NUMPY_AVAILABLE__:
     import numpy
 
+
 def check_array(arr: Iterable, min_samples: int = 1, min_dimension: int = 0,
                 max_dimension: int = None, allow_nan: bool = False,
                 dtype: numpy.dtype = None) -> numpy.array:
@@ -95,6 +96,7 @@ def check_array(arr: Iterable, min_samples: int = 1, min_dimension: int = 0,
 
     return arr
 
+
 def transpose_array(arr: Iterable):
     '''
     Transposes the first two dimensions of the provided array, so a column-first array will become
@@ -119,10 +121,12 @@ def transpose_array(arr: Iterable):
     # Otherwise transpose samples iteratively
     return [[x[i] for x in arr] for i in range(len(arr[0]))]
 
+
 def check_equal_shape(arr1: Iterable, arr2: Iterable):
     ''' Returns true of both arrays are of equal shape as per [shape_of_array]. '''
     assert shape_of_array(arr1) == shape_of_array(arr2), 'Shape of targets differs. Expected ' \
         '%r, found %r' % (shape_of_array(arr1), shape_of_array(arr2))
+
 
 def equal_nested(a: Iterable, b: Iterable, atol: float = 1E-6) -> [bool]:
     ''' Returns true if both arrays, which can be nested, are equal up to `atol` tolerance. '''
@@ -132,6 +136,7 @@ def equal_nested(a: Iterable, b: Iterable, atol: float = 1E-6) -> [bool]:
     if all([isinstance(x, numbers.Number) for x in (a, b)]):
         return [abs(max(a, b) - min(a, b)) < atol]
     return [a == b]
+
 
 def ndim(arr: Iterable) -> int:
     '''
@@ -146,6 +151,7 @@ def ndim(arr: Iterable) -> int:
         arr = arr[0]
     return dim
 
+
 def shape_of_array(arr: Iterable):
     '''
     Computes the shape of the array, including sub-arrays -- looking only at the first item. For
@@ -154,12 +160,14 @@ def shape_of_array(arr: Iterable):
     if not isinstance(arr, ARRAY_LIKE): return tuple()
     return tuple([len(arr), *(shape_of_array(arr[0]))])
 
+
 def shape_of_features(cols: Iterable):
     '''
     Convenience method used to compute the shape of each of the provided features. Essentially,
     returns the dimensions of each column as per [shape_of_array].
     '''
     return {i: shape_of_array(col)[1:] for i, col in enumerate(cols)}
+
 
 def argwhere(arr: Iterable, value: Any = True) -> List:
     ''' Reimplementation of [numpy.argwhere]. '''
@@ -168,12 +176,14 @@ def argwhere(arr: Iterable, value: Any = True) -> List:
     #     return numpy.argwhere(arr[arr == value]).flatten().tolist()
     return [idx for idx, val in enumerate(arr) if val == value]
 
+
 def argmax(arr: Iterable[Iterable]) -> List:
     ''' Returns the index of the max value item for each row in a 2D array '''
     if __NUMPY_AVAILABLE__:
         return numpy.argmax(arr, axis=1).flatten().tolist()
     row_len = len(arr[0])
     return [max(zip(row, range(row_len)))[1] for row in arr]
+
 
 def argmin(arr: Iterable[float]) -> float:
     ''' Reimplementation of [numpy.argmin]. '''
@@ -182,12 +192,14 @@ def argmin(arr: Iterable[float]) -> float:
     row_len = len(arr[0])
     return [min(zip(row, range(row_len)))[1] for row in arr]
 
+
 def argsort(arr: Iterable) -> list:
     ''' Reimplementation of [numpy.argsort]. '''
     if __NUMPY_AVAILABLE__:
         return numpy.argsort(arr).tolist()
     arr_sorted = list(sorted(arr))
     raise NotImplementedError()
+
 
 def concat_arrays(*arrays: Iterable):
     '''
@@ -218,6 +230,7 @@ def concat_arrays(*arrays: Iterable):
     # Return all concatenated arrays
     return arr_concat
 
+
 def take_slice(arr: Iterable, start: int = None, stop: int = None, step: int = None):
     '''
     Attempt to take elemenets between [start] and [end] using slicing, fallback to individual item
@@ -231,6 +244,7 @@ def take_slice(arr: Iterable, start: int = None, stop: int = None, step: int = N
     except:
         return [arr[i] for i in range(start, stop, step)]
 
+
 def take_elems(arr: Iterable, elems: list):
     '''
     Attempt to take elements using a list and the `__get__` interface, fallback to individual item
@@ -240,6 +254,7 @@ def take_elems(arr: Iterable, elems: list):
         return arr[elems]
     except:
         return [arr[i] for i in elems]
+
 
 def take_axis(arr: Iterable, axis: tuple):
     '''
@@ -253,6 +268,7 @@ def take_axis(arr: Iterable, axis: tuple):
         if len(axis) > 2:
             return take_axis(ax, axis[1:])
         return take_any(ax, axis[1])
+
 
 def take_any(arr: Iterable, key):
     '''
@@ -273,12 +289,13 @@ def take_any(arr: Iterable, key):
 
         if isinstance(key, slice):
             return take_slice(arr, key.start, stop=key.stop, step=key.step)
-        
+
         if isinstance(key, list):
             return take_elems(arr, key)
-            
+
         raise TypeError('Unknown key type. Expected one of %r, found %r' %
                         ((int, slice, list, tuple), type(key)))
+
 
 def array_to_tuple(arr: Iterable):
     ''' Recursively convert an array-like object to a tuple '''
@@ -288,11 +305,13 @@ def array_to_tuple(arr: Iterable):
     return tuple([array_to_tuple(elem) if isinstance(elem, (list, numpy.ndarray)) else elem
                   for elem in arr])
 
+
 def unique(arr: Iterable):
     ''' Returns all the unique elements in the array. '''
     if __NUMPY_AVAILABLE__ and isinstance(arr, numpy.ndarray):
         return numpy.unique(arr).tolist()
     return sorted(list(set(arr)))
+
 
 def flatten(arr: Iterable):
     ''' Returns a 1D list given an array of arbitrary shape by collapsing all its dimensions. '''
@@ -312,9 +331,11 @@ def flatten(arr: Iterable):
             output.append(val)
     return output
 
+
 def difference(arr1: Iterable, arr2: Iterable):
     ''' Computes the set difference between two arrays. '''
     return numpy.setdiff1d(arr1, arr2)
+
 
 def value_counts(arr: Iterable):
     ''' Returns a histogram of all values from the given array. '''
@@ -324,6 +345,7 @@ def value_counts(arr: Iterable):
     counts = reversed(sorted([(val, num) for val, num in counts.items()]))
     return [val for val, num in counts], [num for val, num in counts]
 
+
 def _is_npy_nan(val):
     if not __NUMPY_AVAILABLE__:
         return False
@@ -331,6 +353,7 @@ def _is_npy_nan(val):
         return numpy.isnan(val)
     except TypeError:
         return False
+
 
 def is_null(arr: Iterable):
     '''

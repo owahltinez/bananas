@@ -12,6 +12,7 @@ from ..statistics.random import RandomState
 # Disable variable name nagging since these are mostly math functions
 # pylint: disable=invalid-name
 
+
 def new_labels(samples: int = 1024, random_seed: int = None, key: str = None) -> DataSet:
     ''' Random labeled dataset '''
     rng = RandomState(random_seed)
@@ -26,6 +27,7 @@ def new_labels(samples: int = 1024, random_seed: int = None, key: str = None) ->
     return DataSet.from_ndarray(  # keep X in [0, 1]
         numpy.asarray([X / num_labels]), y, random_seed=random_seed, name='labels')
 
+
 def new_line(samples: int = 1024, random_seed: int = None, noise_scale: float = .05) -> DataSet:
     ''' ~y = a * ~X + b '''
     rng = RandomState(random_seed)
@@ -37,6 +39,7 @@ def new_line(samples: int = 1024, random_seed: int = None, noise_scale: float = 
     y_ = a * (X + r) + b  # samples with noise
     y_ += (rng.randn(samples) - .5) * noise_scale  # noise
     return DataSet.from_ndarray(numpy.asarray([X]), y, random_seed=random_seed, name='line')
+
 
 def new_poly(samples: int = 1024, random_seed: int = None, degree: int = 4,
              noise_scale: float = .05) -> DataSet:
@@ -53,6 +56,7 @@ def new_poly(samples: int = 1024, random_seed: int = None, degree: int = 4,
     y_ += (rng.randn(samples) - .5) * noise_scale  # noise
     return DataSet.from_ndarray(numpy.asarray([X]), y, random_seed=random_seed, name='poly')
 
+
 def new_trig(samples: int = 1024, random_seed: int = None, noise_scale: float = .05) -> DataSet:
     ''' ~y = a * (sin or cos)(~X) + b '''
     rng = RandomState(random_seed)
@@ -67,6 +71,7 @@ def new_trig(samples: int = 1024, random_seed: int = None, noise_scale: float = 
     y_ += (rng.randn(samples) - .5) * noise_scale  # noise
     return DataSet.from_ndarray(numpy.asarray([X]), y, random_seed=random_seed, name='trig')
 
+
 def new_wave(samples: int = 1024, random_seed: int = None, noise_scale: float = .05) -> DataSet:
     ''' ~y = a * (sin or cos)(~X) + b '''
     rng = RandomState(random_seed)
@@ -80,6 +85,7 @@ def new_wave(samples: int = 1024, random_seed: int = None, noise_scale: float = 
     y_ = (a * op((X + r) * t) + b) * t  # samples with noise
     y_ += (rng.randn(samples) - .5) * noise_scale  # noise
     return DataSet.from_ndarray(numpy.asarray([X]), y, random_seed=random_seed, name='wave')
+
 
 def new_mat9(samples: int = 1024, random_seed: int = None, k: int = 27,
              noise_scale: float = .2) -> DataSet:

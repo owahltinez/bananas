@@ -62,7 +62,7 @@ class DummyClassifier(BaseClassifier):
             return [[count / total for count in self.value_counts_.values()]] * sample_count
 
         if self.strategy == 'random':
-             return [self._rng.rand(class_count) for _ in range(sample_count)]
+            return [self._rng.rand(class_count) for _ in range(sample_count)]
 
         raise RuntimeError('Unknown strategy: %s' % self.strategy)
 

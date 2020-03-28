@@ -9,9 +9,10 @@ from enum import Enum, auto
 from typing import Callable, List, Tuple
 from statistics import variance
 from .basic import almost_zero, mean
-from ..utils.arrays import argmax, argsort, equal_nested, check_equal_shape, take_elems
+from ..utils.arrays import argmax, equal_nested, check_equal_shape
 
 ScoringFunctionImpl = Callable[[List, List], float]
+
 
 @dataclass
 class TFPN(object):
@@ -20,6 +21,7 @@ class TFPN(object):
     true_negatives: int = 0
     false_positives: int = 0
     false_negatives: int = 0
+
 
 class ScoringFunction(Enum):
     ''' Enum declaring different types of scoring function '''
@@ -56,6 +58,7 @@ class ScoringFunction(Enum):
 
         raise NotImplementedError('This method should be overridden')
 
+
 def score_r2(y_true: List[float], y_pred: List[float]) -> float:
     '''
     Coefficient of determination score, should range between 0 and 1 in most cases but can also
@@ -83,6 +86,7 @@ def score_r2(y_true: List[float], y_pred: List[float]) -> float:
 
     return 1 - (sse / tse)
 
+
 def score_accuracy(y_true: List[int], y_prob: List[List[float]]) -> float:
     '''
     Computes accuracy of labels in predicted set compared to the ground truth.
@@ -98,13 +102,11 @@ def score_accuracy(y_true: List[int], y_prob: List[List[float]]) -> float:
     check_equal_shape(y_true, y_pred)
     return sum(equal_nested(y_true, y_pred)) / len(y_true)
 
+
 def _compute_tfpn_counts(y_true: List[float], y_prob: List[float], threshold: float = .5) -> TFPN:
     '''
     Computes the counts of true and false positive and negative predictions.
     '''
-
-    # Sort the probabilities to start with negative examples
-    #sorted_sample_indices = argsort(y_prob)
 
     # Initialize the counters for true/false positives/negatives
     true_positives = 0
@@ -146,6 +148,7 @@ def _compute_tfpn_counts(y_true: List[float], y_prob: List[float], threshold: fl
         false_positives=false_positives,
         false_negatives=false_negatives)
 
+
 def score_precision_binary(y_true: List[float], y_prob: List[float],
                            threshold: float = .5, counts: TFPN = None) -> float:
     '''
@@ -153,6 +156,7 @@ def score_precision_binary(y_true: List[float], y_prob: List[float],
     '''
     counts = counts or _compute_tfpn_counts(y_true, y_prob, threshold=threshold)
     return counts.true_positives / max(1, counts.true_positives + counts.false_positives)
+
 
 def score_recall_binary(y_true: List[int], y_prob: List[float],
                         threshold: float = .5, counts: TFPN = None) -> float:
@@ -162,6 +166,7 @@ def score_recall_binary(y_true: List[int], y_prob: List[float],
     counts = counts or _compute_tfpn_counts(y_true, y_prob, threshold=threshold)
     return counts.true_positives / max(1, counts.true_positives + counts.false_negatives)
 
+
 def score_f1_binary(y_true: List[int], y_prob: List[float], threshold: float = .5) -> float:
     '''
     Computes the F1 score of a set of predictions compared to the ground truth.
@@ -170,6 +175,7 @@ def score_f1_binary(y_true: List[int], y_prob: List[float], threshold: float = .
     precision = score_precision_binary(y_true, y_prob, threshold=threshold, counts=counts)
     recall = score_recall_binary(y_true, y_prob, threshold=threshold, counts=counts)
     return 2 * precision * recall / max(1, precision + recall)
+
 
 def roc_curve_binary(y_true: List[float], y_prob: List[float],
                      bin_count: int = 100) -> Tuple[List[float], List[float]]:
@@ -211,6 +217,7 @@ def roc_curve_binary(y_true: List[float], y_prob: List[float],
     # Return a tuple of <True Positive Rate, False Positive Rate>
     return tpr, fpr
 
+
 def _one_vs_all(y_true: List[int], y_prob: List[List[float]]):
 
     # Get the number of classes
@@ -226,12 +233,14 @@ def _one_vs_all(y_true: List[int], y_prob: List[List[float]]):
         # Yield the binarized outputs
         yield y_true_binary, y_prob_binary
 
+
 def score_precision(y_true: List[int], y_prob: List[List[float]], threshold: float = .5) -> float:
     '''
     Computes the precision of a set of predictions compared to the ground truth.
     '''
     return mean([score_precision_binary(y_true_bin, y_prob_bin, threshold=threshold)
                  for y_true_bin, y_prob_bin in _one_vs_all(y_true, y_prob)])
+
 
 def score_recall(y_true: List[int], y_prob: List[List[float]], threshold: float = .5) -> float:
     '''
@@ -240,12 +249,14 @@ def score_recall(y_true: List[int], y_prob: List[List[float]], threshold: float 
     return mean([score_recall_binary(y_true_bin, y_prob_bin, threshold=threshold)
                  for y_true_bin, y_prob_bin in _one_vs_all(y_true, y_prob)])
 
+
 def score_f1(y_true: List[int], y_prob: List[List[float]], threshold: float = .5) -> float:
     '''
     Computes the F1 score of a set of predictions compared to the ground truth.
     '''
     return mean([score_f1_binary(y_true_bin, y_prob_bin, threshold=threshold)
                  for y_true_bin, y_prob_bin in _one_vs_all(y_true, y_prob)])
+
 
 def roc_curve_multiclass(y_true: List[int], y_prob: List[List[float]], bin_count: int = 100):
 
@@ -260,6 +271,7 @@ def roc_curve_multiclass(y_true: List[int], y_prob: List[List[float]], bin_count
 
     # Output the mean ROC curve across all labels
     return [mean(samples) for samples in zip(*tprs)], [mean(samples) for samples in zip(*fprs)]
+
 
 def score_auroc(y_true: List[int], y_prob: List[List[float]]) -> float:
     '''

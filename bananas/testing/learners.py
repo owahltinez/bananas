@@ -9,7 +9,7 @@ import warnings
 from inspect import signature, Parameter
 from unittest import TestCase, TestResult
 from ..changemap.changemap import ChangeMap
-from ..core.learner import *
+from ..core.learner import Learner, *
 from ..core.mixins import *
 from ..core.learner import _ATTR_NAMED_ARGUMENTS_PREFIX
 from ..dataset.dataset import DataSet
@@ -191,7 +191,7 @@ class UnsupervisedLearnerTests(_LearnerTests):
                 generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)),
             (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1),
                 generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0).reshape(2, -1))]
-            #(generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1, 2),
+            # (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1, 2),
             #    generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)).reshape(2, -1, 2)]
 
         for X1, X2 in features:
@@ -247,7 +247,7 @@ class SupervisedLearnerTests(_LearnerTests):
                 generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)),
             (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1),
                 generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0).reshape(2, -1))]
-            #(generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1, 2),
+            # (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1, 2),
             #    generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)).reshape(2, -1, 2)]
         targets = [
             (generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),

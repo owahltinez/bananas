@@ -1,7 +1,6 @@
 ''' Test Preprocessing Module '''
 
 from bananas.sampledata.local import load_bike, load_boston, load_california, load_titanic
-from bananas.sampledata.synthetic import new_line, new_labels
 
 from bananas.preprocessing.standard import StandardPreprocessor
 
@@ -28,5 +27,6 @@ class TestUtils(ProfilingTestCase):
                 self.assertListEqual(X_list[0], X_list[i])
                 self.assertListEqual(y_list[0], y_list[i])
                 self.assertListEqual(Xt_list[0], Xt_list[i])
+
 
 main()

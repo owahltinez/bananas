@@ -5,7 +5,9 @@ import numpy
 from pathlib import Path
 
 from bananas.dataset import DataType, Feature, DataSet
-from bananas.testing.generators import *
+from bananas.testing.generators import \
+    generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
+    generate_array_nones, generate_array_strings, generate_images, generate_onehot_matrix
 from bananas.utils.constants import SAMPLE_SIZE_SMALL
 
 from .test_profiling import ProfilingTestCase, main

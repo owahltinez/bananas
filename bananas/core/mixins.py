@@ -22,11 +22,11 @@ class BaseClassifier(SupervisedLearner):
     rather than instantiating it directly.
 
     Learners that inherit from the `BaseClassifier` mixin belong to the family of [classifiers](
-    https://en.wikipedia.org/wiki/Statistical_classification). Classifiers are a subset of [supervised
-    learners](learner.html#bananas.core.learner.SupervisedLearner) for which the feature labels are one of N classes.
-    Learners in this category output the predicted class when `predict` is called, or a vector of
-    probabilities for each of the classes when `predict_proba` is called -- which is in the same
-    order as the classes in the `BaseClassifier.classes_` property.
+    https://en.wikipedia.org/wiki/Statistical_classification). Classifiers are a subset of
+    [supervisedlearners](learner.html#bananas.core.learner.SupervisedLearner) for which the feature
+    labels are one of N classes. Learners in this category output the predicted class when `predict`
+    is called, or a vector of probabilities for each of the classes when `predict_proba` is called
+    -- which is in the same order as the classes in the `BaseClassifier.classes_` property.
     '''
 
     def __init__(self, classes: List[Any] = None,
