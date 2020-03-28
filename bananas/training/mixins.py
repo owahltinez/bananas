@@ -17,14 +17,14 @@ class TrainableMixin(object):
     1. If called with no arguments, it produces a set of samples.
     2. It accepts an optional argument, `subset`, which would be `DataSplit.TEST`.
 
-    When the `subset` argument is passed, the input function is expected to draw from the test subset
-    of input data.
+    When the `subset` argument is passed, the input function is expected to draw from the test
+    subset of input data.
 
     # Sampling
     Instead of implementing a custom input function, users are encouraged to use one of the classes
-    provided in the [sampling module](../sampling/index.md). To avoid loading all data into memory, take
-    a look at implementing a [custom data class](../sampling/index.md#custom-data-class) that is
-    compatible with the sampling classes.
+    provided in the [sampling module](../sampling/index.md). To avoid loading all data into memory,
+    take a look at implementing a [custom data class](../sampling/index.md#custom-data-class) that
+    is compatible with the sampling classes.
     '''
 
     best_score_: float = None
@@ -58,11 +58,11 @@ class TrainableMixin(object):
 
         # Iterate over max_steps, show progress bar if requested
         iterations = range(max_steps)
+        iterations_desc = self.__class__.__name__
         if progress:
             # TODO: overwrite self.print to use tqdm.write temporarily
             # TODO: if pipeline, use name of estimator step for description
-            desc = self.__class__.__name__
-            iterations = tqdm_(range(max_steps), desc=desc, leave=False)
+            iterations = tqdm_(range(max_steps), desc=iterations_desc, leave=False)
 
         # Compute the maximum log10 that we care about for the purpose of printing progress
         max_n = int(log10(max_steps))
@@ -71,16 +71,19 @@ class TrainableMixin(object):
         break_flag = False
 
         for idx in iterations:
-            
+
             # Avoid breaking out of the loop, just keep calling continue until this is over
             if break_flag: continue
 
             # Print progress at 1, 2, 3, ..., 10, 20, 30, ..., 100, 200, 300, ..., 1000, 2000, ...
             if any([idx < (10 ** (n + 1)) and (idx + 1) % (10 ** n) == 0 for n in range(max_n)]):
                 loop_log = 'Training iteration %d/%d.' % (idx + 1, max_steps)
-                test_log = 'Current test score: %.03f.' % self.running_score_ \
-                    if self.running_score_ else ''
+                test_log = 'Current test score: %.03f.' % (self.running_score_ or 0)
                 self.print('%s %s' % (loop_log, test_log))
+
+            # Keep progress bar updated with latest score
+            if progress and self.running_score_:
+                iterations.set_description(iterations_desc + ' (%.03f)' % self.running_score_)
 
             # Pull a sample for training and fit the estimator with it
             X_train, y_train = input_fn()
@@ -108,6 +111,7 @@ class TrainableMixin(object):
             step_data.y_test = y_test
             step_data.X_train = X_train
             step_data.y_train = y_train
+            step_data.iterator = iterations
 
             # Exit criteria: custom user criteria
             if callback is not None and callback(step_data):

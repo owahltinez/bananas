@@ -14,7 +14,7 @@ except ImportError:
 import tqdm
 try:
     __IPYTHON__
-    from tqdm import tqdm_notebook as tqdm_
+    from tqdm.notebook import tqdm as tqdm_
 except NameError:
     from tqdm import tqdm as tqdm_
 
