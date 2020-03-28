@@ -1,5 +1,5 @@
 '''
-Test suite and a number of utilities used to ensure compatiblity with the API.
+Test suite and a number of utilities used to ensure compatibility with the API.
 
 The testing module is of great importance and any users of this package are greatly discouraged
 from modifying it. It ensures compatibility across different ML frameworks, so their estimators and
