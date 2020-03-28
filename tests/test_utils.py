@@ -2,7 +2,10 @@
 
 import numpy
 from bananas.utils.arrays import check_array, concat_arrays, shape_of_array, transpose_array
-from bananas.testing.generators import *
+from bananas.testing.generators import \
+    generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
+    generate_array_int_floats, generate_array_uints, generate_array_nones, generate_array_strings, \
+    generate_images, generate_onehot_matrix, generate_array_infinities
 
 from .test_profiling import ProfilingTestCase, main
 

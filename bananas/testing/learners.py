@@ -9,18 +9,22 @@ import warnings
 from inspect import signature, Parameter
 from unittest import TestCase, TestResult
 from ..changemap.changemap import ChangeMap
-from ..core.learner import Learner, *
-from ..core.mixins import *
+from ..core.learner import Learner, SupervisedLearner, UnsupervisedLearner
+from ..core.mixins import BaseClassifier, BaseRegressor
 from ..core.learner import _ATTR_NAMED_ARGUMENTS_PREFIX
 from ..dataset.dataset import DataSet
 from ..core.pipeline import Pipeline
 from ..transformers.base import BaseTransformer
 from ..utils.arrays import check_array, unique
 from ..utils.misc import valid_parameters, warn_with_traceback
-from .generators import *
+from .generators import \
+    generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
+    generate_array_int_floats, generate_array_uints, generate_array_nones, generate_array_strings, \
+    generate_images, generate_onehot_matrix, generate_array_infinities
 
 # Number of samples in the test data
 TEST_SAMPLE_SIZE = 1024
+
 
 def test_learner(learner_type: (type, Learner), **learner_kwargs):
     '''
@@ -87,6 +91,7 @@ def test_learner(learner_type: (type, Learner), **learner_kwargs):
         (result.errors[0][1] if result.errors else result.failures[0][1]))
 
     return True
+
 
 def assert_predictions_match_cloned_learner(test: TestCase, y1, y2):
     y1, y2 = list(y1[:100]), list(y2[:100])  # limit amount of comparisons for perf and put in list

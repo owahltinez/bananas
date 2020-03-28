@@ -6,7 +6,10 @@ import numpy
 from bananas.changemap.changemap import ChangeMap
 from bananas.core.pipeline import Pipeline, PipelineStep
 from bananas.testing.learners import test_learner
-from bananas.testing.generators import *
+from bananas.testing.generators import \
+    generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
+    generate_array_int_floats, generate_array_uints, generate_array_nones, generate_array_strings, \
+    generate_images, generate_onehot_matrix, generate_array_infinities
 from bananas.testing.dummy import DummyTransformer
 from bananas.transformers.drop import FeatureDrop
 from bananas.transformers.encoders import LabelEncoder, OneHotEncoder
