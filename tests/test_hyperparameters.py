@@ -95,7 +95,7 @@ class TestUtils(ProfilingTestCase):
                     {'a': 3, 'b': 'x'},
                     {'a': 3, 'b': 'y'},
                     {'a': 3, 'b': 'z'}]
-        search = GridSearch(CustomEstimator, param_grid=params)
+        search = GridSearch(CustomEstimator, learner_parameters=params)
         result = [{'a': getattr(learner, 'a'), 'b': getattr(learner, 'b')}
                   for learner in search._iter_learners()]
         self.assertListEqual(expected, result)

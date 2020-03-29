@@ -37,7 +37,7 @@ class BruteForce(_MetaLearner):
                 PipelineStep(name='preprocessor', learner=StandardPreprocessor, kwargs={
                     'categorical': dataset.categorical, 'continuous': dataset.continuous}),
                 PipelineStep(name='estimator', learner=GridSearch, kwargs={
-                    'learner': learner, 'verbose': verbose, 'param_grid': {
+                    'learner': learner, 'verbose': verbose, 'learner_parameters': {
                         **learner.hyperparameters(dataset), **learner_kwargs}})]
             self.estimators.append(Pipeline(pipeline_steps, verbose=verbose))
 

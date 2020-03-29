@@ -11,12 +11,11 @@ from unittest import TestCase, TestResult
 from ..changemap.changemap import ChangeMap
 from ..core.learner import Learner, SupervisedLearner, UnsupervisedLearner
 from ..core.mixins import BaseClassifier, BaseRegressor
-from ..core.learner import _ATTR_NAMED_ARGUMENTS_PREFIX
 from ..dataset.dataset import DataSet
-from ..core.pipeline import Pipeline
+from ..training.train_history import TrainHistory
 from ..transformers.base import BaseTransformer
 from ..utils.arrays import check_array, unique
-from ..utils.misc import valid_parameters, warn_with_traceback
+from ..utils.misc import warn_with_traceback
 from .generators import \
     generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
     generate_array_int_floats, generate_array_uints, generate_array_nones, generate_array_strings, \
@@ -246,7 +245,6 @@ class SupervisedLearnerTests(_LearnerTests):
         learner.fit(X2, y)
 
     def test_supervised_batch_size_changed(self):
-        learner: SupervisedLearner = self._get_learner()
         features = [
             (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
                 generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)),
@@ -261,7 +259,7 @@ class SupervisedLearnerTests(_LearnerTests):
                 generate_array_int_floats(n=TEST_SAMPLE_SIZE // 4, random_seed=0))]
 
         for (X1, X2), (y1, y2) in zip(features, targets):
-            learner = self._get_learner()
+            learner: SupervisedLearner = self._get_learner()
             # Fit first batch
             learner.fit(X1, y1)
             # Fit second batch
@@ -285,7 +283,6 @@ class TransformerTests(_LearnerTests):
         self.assertListEqual(Xt1, Xt2)
 
     def test_transformer_inverse_transform(self):
-        learner: BaseTransformer = self._get_learner()
 
         # Inverse transform should work at least with one of continuous or multiclass
         continous_data = generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0)
@@ -332,7 +329,6 @@ class RegressorTests(_LearnerTests):
     ''' Tests designed for regressors. '''
 
     def test_regressor_fit_1D(self):
-        learner: BaseRegressor = self._get_learner()
         features = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -353,7 +349,6 @@ class RegressorTests(_LearnerTests):
                 learner.fit(X, y)
 
     def test_regressor_fit_1D_single_sample(self):
-        learner: BaseRegressor = self._get_learner()
         features = [
             generate_array_floats(n=1, random_seed=0),
             generate_array_int_floats(n=1, random_seed=0),
@@ -395,7 +390,6 @@ class RegressorTests(_LearnerTests):
                 learner.fit(X, y)
 
     def test_regressor_fit_3D(self):
-        learner: BaseRegressor = self._get_learner()
         features = [
             generate_array_floats(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
@@ -416,7 +410,6 @@ class RegressorTests(_LearnerTests):
                 learner.fit(X, y)
 
     def test_regressor_predict(self):
-        learner: BaseRegressor = self._get_learner()
         features = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -450,7 +443,6 @@ class RegressorTests(_LearnerTests):
                 assert_predictions_match_cloned_learner(self, y1, y3)
 
     def test_regressor_train(self):
-        learner: BaseRegressor = self._get_learner()
         features = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -472,11 +464,11 @@ class RegressorTests(_LearnerTests):
 
         for X in features:
             for y in targets:
-                # Make sure that `train` returns self
+                # Make sure that `train` returns history object
                 learner1 = self._get_learner()
                 input_fn = DataSet.from_ndarray(X, y, random_seed=0).input_fn
-                learner1_ = learner1.train(input_fn, max_steps=10)
-                self.assertEqual(learner1, learner1_)
+                history = learner1.train(input_fn, max_steps=10)
+                self.assertEqual(type(history), TrainHistory)
 
                 # Make sure that learners predict same data
                 learner2 = self._get_learner()
@@ -491,7 +483,6 @@ class ClassifierTests(_LearnerTests):
     ''' Tests designed for classifiers. '''
 
     def test_classifier_fit_1D(self):
-        learner: BaseClassifier = self._get_learner()
         features = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -513,7 +504,6 @@ class ClassifierTests(_LearnerTests):
                 learner.fit(X, y)
 
     def test_classifier_fit_1D_single_sample(self):
-        learner: BaseClassifier = self._get_learner()
         features = [
             generate_array_floats(n=1, random_seed=0),
             generate_array_int_floats(n=1, random_seed=0),
@@ -535,7 +525,6 @@ class ClassifierTests(_LearnerTests):
                 learner.fit(X, y)
 
     def test_classifier_fit_2D(self):
-        learner: BaseClassifier = self._get_learner()
         features = [
             generate_array_floats(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
@@ -579,7 +568,6 @@ class ClassifierTests(_LearnerTests):
                 learner.fit(X, y)
 
     def test_classifier_predict(self):
-        learner: BaseClassifier = self._get_learner()
         features = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -639,18 +627,17 @@ class ClassifierTests(_LearnerTests):
 
         for X in features:
             for y in targets:
-                learner: BaseClassifier = self._get_learner(classes=unique(y))
 
-                # Make sure that `train` returns self
+                # Make sure that `train` returns history object
                 learner1 = self._get_learner()
                 input_fn = DataSet.from_ndarray(X, y, random_seed=0).input_fn
-                learner1_ = learner1.train(input_fn, max_steps=10)
-                self.assertEqual(learner1, learner1_)
+                history = learner1.train(input_fn, max_steps=10)
+                self.assertEqual(type(history), TrainHistory)
 
                 # Make sure that learners predict same data
                 learner2 = self._get_learner()
                 input_fn = DataSet.from_ndarray(X, y, random_seed=0).input_fn
-                learner2_ = learner2.train(input_fn, max_steps=10)
+                learner2.train(input_fn, max_steps=10)
                 y1 = learner1.predict(X)
                 y2 = learner2.predict(X)
                 assert_predictions_match_cloned_learner(self, y1, y2)

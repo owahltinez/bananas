@@ -26,11 +26,13 @@ class WindowStats:
         Add a sample to this object's history. If we exceed the window size, the oldest sample is
         removed.
         '''
-        if len(self.history_) >= self._window_size:
+        while len(self.history_) >= self._window_size:
             self.history_.pop(0)
+
         self.history_.append(sample)
         self.min_ = min(self.history_)
         self.max_ = max(self.history_)
         self.mean_ = mean(self.history_)
         self.median_ = median(self.history_)
-        self.variance_ = variance(self.history_)
+        if len(self.history_) > 3:
+            self.variance_ = variance(self.history_)

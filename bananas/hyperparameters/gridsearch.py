@@ -37,14 +37,14 @@ class GridSearch(_MetaLearner):
     of parameters. The learner is re-initialized only once for each possible set of parameters.
     '''
 
-    def __init__(self, learner: Type[Learner], param_grid: Dict[str, Any], n_jobs: int = 1,
+    def __init__(self, learner: Type[Learner], learner_parameters: Dict[str, Any], n_jobs: int = 1,
                  verbose: bool = False):
         '''
         Parameters
         ----------
         learner : Type[Learner]
             TODO
-        param_grid : Dict[str, Any]
+        learner_parameters : Dict[str, Any]
             TODO
         n_jobs : int
             TODO
@@ -53,14 +53,18 @@ class GridSearch(_MetaLearner):
         '''
         super().__init__(n_jobs=n_jobs, verbose=verbose)
         self.learner: Type[Learner] = learner
-        self.param_grid = param_grid
+        self.learner_parameters = learner_parameters
+        self.parameters_: Dict[Learner, Dict[str, Any]] = {}
 
     def _get_learner(self, idx, parameters: Dict[str, Any]) -> Learner:
         if idx not in self._learners_cache:
             has_verbose = issubclass(self.learner, Pipeline) and \
                 valid_parameters(self.learner.__init__, {'verbose': None})
             if has_verbose: parameters['verbose'] = self.verbose
-            self._learners_cache[idx] = self.learner(**parameters)
+            learner_instance = self.learner(**parameters)
+            self._learners_cache[idx] = learner_instance
+            # Store the parameters in a dict that can be retrieved later
+            self.parameters_[learner_instance] = parameters
         return self._learners_cache[idx]
 
     def _iter_learners(self) -> Generator[Learner, None, None]:
@@ -69,7 +73,8 @@ class GridSearch(_MetaLearner):
         learner_count = 0
 
         # For each learner, iterate over all possible parameters
-        for idx, parameter_set in enumerate(_iter_parameters(self.learner, self.param_grid)):
+        parameter_iterator = _iter_parameters(self.learner, self.learner_parameters)
+        for idx, parameter_set in enumerate(parameter_iterator):
             learner_count += 1
             yield self._get_learner(idx, parameter_set)
 

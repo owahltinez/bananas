@@ -1,11 +1,14 @@
 ''' Meta-Learner Module '''
 
+from time import sleep
 from functools import partial
 from multiprocessing.pool import ThreadPool as Pool
 from typing import Dict, Generator
+from threading import Lock
 
 from ..core.learner import Learner
 from ..training.mixins import TrainableMixin
+from ..training.train_history import TrainHistory
 from ..utils import tqdm_
 
 
@@ -27,10 +30,12 @@ class _MetaLearner(Learner, TrainableMixin):
         super().__init__(n_jobs=n_jobs, verbose=verbose, **kwargs)
         self.n_jobs = n_jobs
         self.verbose = verbose
+        self._lock = Lock()
         self._scores_cache = {}
         self._learners_cache: Dict[str, Learner] = {}
         self.best_score_: float = 0.
         self.best_learner_: Learner = None
+        self.history_: Dict[Learner, TrainHistory] = {}
 
     def _iter_learners(self) -> Generator[Learner, None, None]:
         raise NotImplementedError('Subclasses of `%s` must override method `%s`' %
@@ -52,11 +57,11 @@ class _MetaLearner(Learner, TrainableMixin):
     def _score_all(self, X, y=None):
         ''' Private version of `score_all` that updates best_score_ and best_learner_ each time
             it is called. Returns the best score. '''
-        delattr(self, 'best_score_')
+        self.best_score_ = None
         for learner, score in self.score_all(X, y=y):
             self._scores_cache[learner] = score
 
-            if not hasattr(self, 'best_score_') or score > self.best_score_:
+            if not self.best_score_ or score > self.best_score_:
                 self.best_score_ = score
                 self.best_learner_ = learner
 
@@ -73,39 +78,47 @@ class _MetaLearner(Learner, TrainableMixin):
         return self.best_learner_.score(X, y=y)
 
     def _train_worker(self, *train_args, **train_kwargs):
-        # Early exit: if goal score has been reached
-        if hasattr(self, 'best_score_') and \
+        # Early exit: if goal score has been reached by another learner before us
+        if self.best_score_ > 0. and \
             self.best_score_ >= train_kwargs.get('max_score', 1): return
 
+        # Introduce a small wait time to work around threading issues with tqdm
+        if train_kwargs.get('progress'): sleep(0.1)
+
         # Call training on underlying learner
-        learner = train_args[-1]
-        learner.train(*train_args[:-1], **train_kwargs)
+        learner: TrainableMixin = train_args[-1]
+        history = learner.train(*train_args[:-1], **train_kwargs)
+        learner_score = max(history.scores)
 
-        # Update best score
-        if not hasattr(self, 'best_score_') or learner.best_score_ > self.best_score_:
-            self.best_learner_ = learner
-            self.best_score_ = learner.best_score_
+        # Make sure all updates to the object are done thread-safely
+        with self._lock:
 
-    def train(self, *train_args, progress: bool = False, **train_kwargs):
+            # Record learner history
+            self.history_[learner] = history
+
+            # Update best learner
+            if learner_score > self.best_score_:
+                self.best_learner_ = learner
+                self.best_score_ = learner_score
+
+    def train(self, *train_args, **train_kwargs):
         ''' Trains all learners with data by calling `learner.train(...)` on each one '''
 
         learners = list(self._iter_learners())
-        train_kwargs = {'progress': progress, **train_kwargs}
 
         # Build partial function combining parameters
         worker = partial(self._train_worker, *train_args, **train_kwargs)
 
         if self.n_jobs > 1:
-            futures = Pool(self.n_jobs).imap_unordered(worker, learners)
+            futures = Pool(self.n_jobs).imap(worker, learners)
         else:
             futures = (worker(learner) for learner in learners)
 
-        if progress:
-            # TODO: overwrite self.print to use tqdm.write temporarily
-            futures = tqdm_(
-                futures, desc='%s parameter sets' % type(self).__name__, total=len(learners), leave=False)
+        if train_kwargs.get('progress'):
+            futures = tqdm_(futures, desc=type(self).__name__, total=len(learners), leave=False)
 
         # Consume all the future results
         for _ in futures: pass
 
-        return self
+        # Return the training history of the best learner
+        return self.history_[self.best_learner_]
