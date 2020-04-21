@@ -1,6 +1,7 @@
 import time
 from math import log10
 from typing import List
+from monotonic import monotonic
 from ..sampling.cross_validation import DataSplit
 from ..training.criteria import HaltCriteria
 from ..training.train_history import TrainHistory
@@ -80,7 +81,7 @@ class TrainableMixin(object):
         max_n = int(log10(max_steps))
 
         # Keep track of the time at which training begun and begin training loop
-        train_start = time.monotonic_ns()
+        train_start = monotonic()
         for idx in range(max_steps):
 
             # Avoid breaking out of the loop, just keep calling continue until this is over
@@ -141,6 +142,6 @@ class TrainableMixin(object):
             progress_bar.close()
 
         # Update the training time and return history
-        history.time_millis = (time.monotonic_ns() - train_start) // 1000
+        history.time_millis = (monotonic() - train_start)
         return history
     # pylint: enable=too-many-arguments

@@ -5,7 +5,7 @@ more efficient way.
 '''
 
 from dataclasses import dataclass
-from enum import Enum, auto
+from enum import IntEnum
 from typing import Callable, List, Tuple
 from statistics import variance
 from .basic import almost_zero, mean
@@ -23,15 +23,15 @@ class TFPN(object):
     false_negatives: int = 0
 
 
-class ScoringFunction(Enum):
+class ScoringFunction(IntEnum):
     ''' Enum declaring different types of scoring function '''
 
-    R2 = auto()
-    ACCURACY = auto()
-    PRECISION = auto()
-    RECALL = auto()
-    F1 = auto()
-    AREA_UNDER_ROC = auto()
+    R2 = 0
+    ACCURACY = 1
+    PRECISION = 2
+    RECALL = 3
+    F1 = 4
+    AREA_UNDER_ROC = 5
 
     @staticmethod
     def create(kind: 'ScoringFunction') -> ScoringFunctionImpl:
