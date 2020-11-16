@@ -1,16 +1,8 @@
 """ Test Datasets Module """
 
-import random
 from bananas.statistics import RandomState
 from bananas.sampledata.local import load_bike, load_boston, load_california, load_titanic
-from bananas.sampledata.synthetic import (
-    new_labels,
-    new_line,
-    new_poly,
-    new_trig,
-    new_wave,
-    new_mat9,
-)
+from bananas.sampledata.synthetic import new_labels, new_line, new_poly, new_trig, new_wave, new_3x3
 from bananas.utils.constants import SAMPLE_SIZE_SMALL
 
 from .test_profiling import ProfilingTestCase, main
@@ -20,7 +12,7 @@ from .test_profiling import ProfilingTestCase, main
 class TestUtils(ProfilingTestCase):
     def test_synthetic(self):
         rng = RandomState(0)
-        for ds_fn in (new_labels, new_line, new_mat9, new_poly, new_trig, new_wave):
+        for ds_fn in (new_labels, new_line, new_3x3, new_poly, new_trig, new_wave):
             n = rng.randint(1, SAMPLE_SIZE_SMALL)
             dataset = ds_fn(samples=n, random_seed=0)
             self.assertTrue(dataset is not None)

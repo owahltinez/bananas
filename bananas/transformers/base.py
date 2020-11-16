@@ -1,8 +1,7 @@
 import sys
-from typing import Dict, Iterable, Set
+from typing import Dict, Iterable, Set, Union
 from ..changemap.changemap import ChangeMap
 from ..core.learner import UnsupervisedLearner
-from ..utils.arrays import ARRAY_LIKE
 
 
 class BaseTransformer(UnsupervisedLearner):
@@ -28,7 +27,7 @@ class BaseTransformer(UnsupervisedLearner):
 class ColumnHandlingTransformer(BaseTransformer):
     """ Implements a transformer that is aware of columns and handles input changes """
 
-    def __init__(self, columns: (dict, Iterable) = None, verbose: bool = False, **kwargs):
+    def __init__(self, columns: Union[Dict, Iterable] = None, verbose: bool = False, **kwargs):
         """
         Parameters
         ----------

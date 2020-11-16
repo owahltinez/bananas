@@ -12,7 +12,7 @@ from ..changemap.changemap import ChangeMap
 from ..dataset.datatype import DataType
 from ..statistics.scoring import ScoringFunction, ScoringFunctionImpl
 from ..transformers.encoders import LabelEncoder
-from ..utils.arrays import argmax, check_array
+from ..utils.arrays import argmax, check_array, shape_of_array
 from .learner import SupervisedLearner
 
 
@@ -34,7 +34,7 @@ class BaseClassifier(SupervisedLearner):
         self,
         classes: List[Any] = None,
         scoring_function: ScoringFunction = ScoringFunction.F1,
-        **kwargs
+        **kwargs,
     ):
         """
         Parameters
@@ -65,7 +65,7 @@ class BaseClassifier(SupervisedLearner):
         # Check label type
         data_type = DataType.parse(y)
         if not DataType.is_categorical(data_type):
-            raise ValueError("Unknown data type for y: %s. Expected categorical type." % data_type)
+            raise ValueError(f"Unknown data type for y: {data_type}. Expected categorical type.")
 
         # Initialize label encoder with classes seen so far
         if self.label_encoder_ is None:
@@ -139,8 +139,22 @@ class BaseRegressor(SupervisedLearner):
 
     def score(self, X: Iterable[Iterable], y: Iterable) -> float:
         self.check_attributes("input_shape_")
-        y = check_array(y, max_dimension=1)
+        y = check_array(y, max_dimension=2)
         return self.scoring_function_(y, self.predict(X))
+
+    def check_X_y(self, X: Iterable[Iterable], y: Iterable):
+        X, y = super().check_X_y(X, y)
+
+        # Record the shape of the target, which cannot change in regressor learner types
+        target_shape = shape_of_array(y)[1:] or (1,)
+        if not self.output_shape_:
+            self.output_shape_ = target_shape
+        elif self.output_shape_ != target_shape:
+            raise RuntimeError(
+                f"Target shape changed. Expected {self.output_shape_}, found {target_shape}."
+            )
+
+        return X, y
 
 
 class HighDimensionalMixin(object):

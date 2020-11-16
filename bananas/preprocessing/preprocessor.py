@@ -1,8 +1,7 @@
-from typing import Any, Dict, Iterable, Tuple
-from ..core.learner import Learner
+from typing import Any, Dict, Iterable, Union
 from ..core.pipeline import Pipeline, PipelineStep
 from ..testing.dummy import DummyTransformer
-from ..utils.arrays import ARRAY_LIKE
+from ..utils.constants import ARRAY_LIKE, TYPE_ARRAY
 
 
 class _Preprocessor(Pipeline):
@@ -13,18 +12,18 @@ class _Preprocessor(Pipeline):
 
     def __init__(
         self,
-        categorical: (dict, ARRAY_LIKE) = None,
-        continuous: (dict, ARRAY_LIKE) = None,
+        categorical: Union[Dict, TYPE_ARRAY] = None,
+        continuous: Union[Dict, TYPE_ARRAY] = None,
         verbose: bool = False,
         **kwargs
     ):
         """
         Parameters
         ----------
-        categorical : (dict, ARRAY_LIKE)
+        categorical : Union[Dict, TYPE_ARRAY]
             Columns that contain categorical data. If a dict is given, values must contain
             categories for that column.
-        continuous : (dict, ARRAY_LIKE)
+        continuous : Union[Dict, TYPE_ARRAY]
             Columns that contain continuous data. If a dict is passed, its values are ignored.
         verbose : Boolean
             Prints debug info
@@ -56,8 +55,6 @@ class _Preprocessor(Pipeline):
             self.print("Initialize dummy step")
 
         # Initialize parent's pipeline
-        # psteps = [(name, klass) for name, klass, kwargs in steps]
-        # pkwargs = {name: kwargs for name, klass, kwargs in steps}
         super().__init__(steps, verbose=verbose)
 
     def _init_steps(self, **kwargs) -> Iterable[PipelineStep]:

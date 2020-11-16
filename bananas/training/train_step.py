@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from ..utils.arrays import ARRAY_LIKE
+from ..utils.constants import TYPE_ARRAY
 
 
 @dataclass
@@ -14,7 +14,7 @@ class TrainStep:
     best_score: float = 0.0
     best_iteration: int = 0
     running_score: float = 0.0
-    X_test: ARRAY_LIKE = None
-    y_test: ARRAY_LIKE = None
-    X_train: ARRAY_LIKE = None
-    y_train: ARRAY_LIKE = None
+    X_test: TYPE_ARRAY = None
+    y_test: TYPE_ARRAY = None
+    X_train: TYPE_ARRAY = None
+    y_train: TYPE_ARRAY = None

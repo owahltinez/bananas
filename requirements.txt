@@ -1,4 +1,4 @@
 dataclasses==0.6
 monotonic==1.5
-numpy==1.18.1
-tqdm==4.43.0
+numpy==1.19.4
+tqdm==4.52.0

@@ -7,6 +7,7 @@ to certain estimators like [supervised learners](../core/index.md#supervised) or
 
 import warnings
 from inspect import signature, Parameter
+from typing import Union
 from unittest import TestCase, TestResult
 from ..changemap.changemap import ChangeMap
 from ..core.learner import Learner, SupervisedLearner, UnsupervisedLearner
@@ -14,7 +15,7 @@ from ..core.mixins import BaseClassifier, BaseRegressor
 from ..dataset.dataset import DataSet
 from ..training.train_history import TrainHistory
 from ..transformers.base import BaseTransformer
-from ..utils.arrays import check_array, unique
+from ..utils.arrays import check_array
 from ..utils.misc import warn_with_traceback
 from .generators import (
     generate_array_booleans,
@@ -23,25 +24,21 @@ from .generators import (
     generate_array_ints,
     generate_array_int_floats,
     generate_array_uints,
-    generate_array_nones,
     generate_array_strings,
-    generate_images,
-    generate_onehot_matrix,
-    generate_array_infinities,
 )
 
 # Number of samples in the test data
 TEST_SAMPLE_SIZE = 1024
 
 
-def test_learner(learner_type: (type, Learner), **learner_kwargs):
+def test_learner(learner_type: Union[type, Learner], **learner_kwargs):
     """
     Performs a battery of tests against the provided learner. If the learner must be initialized
     with certain parameters, those can be passed to this function too.
 
     Parameters
     ----------
-    learner_type : type, Learner
+    learner_type : Union[type, Learner]
         TODO
     learner_kwargs
         TODO

@@ -1,5 +1,6 @@
 """ Module with constants used across a number of utilities, methods and classes """
 
+from typing import Union
 from ..utils import __NUMPY_AVAILABLE__
 
 if __NUMPY_AVAILABLE__:
@@ -7,6 +8,7 @@ if __NUMPY_AVAILABLE__:
 
     # Iterable type represents all types that can be considered a vector
     ARRAY_LIKE = (numpy.ndarray, list, tuple)
+    TYPE_ARRAY = Union[numpy.ndarray, list, tuple]
 
     # For each of the supported dtypes, define a pair of exact dtype, and the base dtype
     DTYPE_BOOL = (numpy.dtype(bool), numpy.bool_)  # pylint: disable=no-member
@@ -21,6 +23,7 @@ else:
     from numbers import Number
 
     ARRAY_LIKE = (list, tuple)
+    TYPE_ARRAY = Union[list, tuple]
     DTYPE_BOOL = (bool, bool)
     DTYPE_FLOAT = (float, Number)
     DTYPE_INT = (int, Number)

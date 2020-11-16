@@ -1,8 +1,8 @@
 """ Threshold-based transformers """
 
+from typing import Dict, Iterable, Union
 from ..changemap.changemap import ChangeMap
-from ..statistics.basic import mean, variance
-from ..utils.arrays import ARRAY_LIKE, flatten, shape_of_array
+from ..utils.arrays import flatten, shape_of_array
 from .base import ColumnHandlingTransformer
 
 
@@ -12,7 +12,7 @@ class RunningStats(ColumnHandlingTransformer):
     techniques, since N is unknown.
     """
 
-    def __init__(self, columns: (dict, ARRAY_LIKE) = None, verbose: bool = False, **kwargs):
+    def __init__(self, columns: Union[Dict, Iterable[int]] = None, verbose: bool = False, **kwargs):
         super().__init__(columns=columns, verbose=verbose, **kwargs)
 
         # Initialize working variables

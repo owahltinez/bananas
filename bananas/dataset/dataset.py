@@ -1,7 +1,7 @@
 # Standard imports
 import csv
 from collections import OrderedDict
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Union
 
 # Third party imports
 import numpy
@@ -104,7 +104,7 @@ class DataSet(object):
             if col.kind == DataType.CONTINUOUS
         }
 
-    def ix(self, key: (Tuple[List[str], Any], Any), transpose: bool = False):
+    def ix(self, key: Union[Tuple[List[str], Any], Any], transpose: bool = False):
         """
         Main indexing method. If `key` is a `Tuple`, the first item must be a list containing the
         names of `Feature`s (or an *everything* slice ":") and the second item the indexing key;
