@@ -12,15 +12,14 @@ class WindowStats:
     Keeps track of basic statistics using only the last `window_size` samples.
     """
 
-    min_: float
-    max_: float
-    mean_: float
-    median_: float
-    variance_: float
-    history_: List[float] = []
-
     def __init__(self, window_size: int = 32):
         self._window_size = window_size
+        self.min_: float = None
+        self.max_: float = None
+        self.mean_: float = None
+        self.median_: float = None
+        self.variance_: float = None
+        self.history_: List[float] = []
 
     def push(self, sample: float):
         """

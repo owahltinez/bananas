@@ -40,7 +40,7 @@ class TrainableMixin(object):
         max_score: float = None,
         progress: bool = False,
         callback: callable = None,
-        **input_fn_opts
+        **input_fn_opts,
     ):
         """
         Keeps drawing samples from `input_fn` and fitting them to the underlying estimator
@@ -61,6 +61,7 @@ class TrainableMixin(object):
         step_data = TrainStep(max_steps=max_steps, max_score=max_score)
         if getattr(self, "verbose", False):
             self.print("Starting training with %d max steps" % max_steps)
+            print(step_data)
 
         # Keep the last handful of scores to compute a running average
         window_scores = WindowStats(window_size=8)
@@ -142,8 +143,10 @@ class TrainableMixin(object):
                 history.early_exit = True
 
             # Exit criteria: canned exit criteria
-            if any([crit(step_data) for crit in halt_criteria]):
-                history.early_exit = True
+            for crit in halt_criteria:
+                if crit(step_data):
+                    history.early_exit = True
+                    self.print(f"Early exit from training due to {crit.__name__} at step {idx}.")
 
         # Dispose of the progress bar
         if progress:

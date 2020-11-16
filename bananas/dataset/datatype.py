@@ -1,7 +1,7 @@
 """ Classes related to features and feature engineering """
 
 # Standard imports
-from enum import IntEnum
+from enum import Enum, auto
 from typing import Union
 
 # Third party imports
@@ -12,17 +12,17 @@ from ..utils.arrays import unique
 from ..utils.constants import DTYPE_BOOL, DTYPE_FLOAT, DTYPE_INT, DTYPE_UINT8, DTYPE_STR, TYPE_ARRAY
 
 
-class DataType(IntEnum):
+class DataType(Enum):
     """ Enum of different kinds of data for a given feature """
 
-    UNKNOWN = -1
-    BINARY = 0
-    ONEHOT = 1
-    CATEGORICAL = 2
-    CONTINUOUS = 3
-    HIGH_DIMENSIOAL = 4
-    IMAGE_PATH = 5
-    VECTOR = 6
+    UNKNOWN = auto()
+    BINARY = auto()
+    ONEHOT = auto()
+    CATEGORICAL = auto()
+    CONTINUOUS = auto()
+    HIGH_DIMENSIOAL = auto()
+    IMAGE_PATH = auto()
+    VECTOR = auto()
 
     @staticmethod
     def is_categorical(data: Union[TYPE_ARRAY, "DataType"]) -> bool:

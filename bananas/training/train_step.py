@@ -6,7 +6,7 @@ from ..utils.constants import TYPE_ARRAY
 class TrainStep:
     """ Data class containing information about the current training iteration. """
 
-    idx: int = 0
+    iteration: int = 0
     step: int = 0
     score: float = 0.0
     max_steps: int = 0
