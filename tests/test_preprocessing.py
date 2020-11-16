@@ -1,4 +1,4 @@
-''' Test Preprocessing Module '''
+""" Test Preprocessing Module """
 
 from bananas.changemap.changemap import ChangeMap
 from bananas.sampledata.local import load_bike, load_boston, load_california, load_titanic
@@ -15,7 +15,6 @@ from .test_profiling import ProfilingTestCase, main
 
 # pylint: disable=missing-docstring
 class TestUtils(ProfilingTestCase):
-
     def test_preprocessor_normalization(self):
         dataset = new_line(random_seed=0)
         target_preprocessor = StandardPreprocessor(continuous=[0], threshold=-1)
@@ -30,8 +29,8 @@ class TestUtils(ProfilingTestCase):
             self.assertEqual(1, len(shape_of_array(y)))
 
             # Scale up to be able to put pressure on normalization
-            X = (X - .5) * 100
-            y = (y - .5) * 100
+            X = (X - 0.5) * 100
+            y = (y - 0.5) * 100
             self.assertGreaterEqual(X.max() - X.min(), 1)
             self.assertGreaterEqual(y.max() - y.min(), 1)
 
@@ -49,7 +48,8 @@ class TestUtils(ProfilingTestCase):
     def test_preprocessor_encode_ordinal(self):
         dataset = new_labels(random_seed=0)
         preprocessor = StandardPreprocessor(
-            categorical=[0], normalization=None, encoding=EncodingStrategy.ORDINAL, threshold=-1)
+            categorical=[0], normalization=None, encoding=EncodingStrategy.ORDINAL, threshold=-1
+        )
 
         num_batches = 10
         for _ in range(num_batches):
@@ -75,8 +75,11 @@ class TestUtils(ProfilingTestCase):
         num_columns = 10
         categorical = list(range(num_columns // 2))
         preprocessor = StandardPreprocessor(
-            categorical=categorical, normalization=None, encoding=EncodingStrategy.DROP,
-            threshold=-1)
+            categorical=categorical,
+            normalization=None,
+            encoding=EncodingStrategy.DROP,
+            threshold=-1,
+        )
 
         num_batches = 10
         for _ in range(num_batches):
@@ -98,7 +101,8 @@ class TestUtils(ProfilingTestCase):
     def test_preprocessor_encode_onehot(self):
         dataset = new_labels(random_seed=0)
         preprocessor = StandardPreprocessor(
-            categorical=[0], normalization=None, encoding=EncodingStrategy.ONEHOT, threshold=-1)
+            categorical=[0], normalization=None, encoding=EncodingStrategy.ONEHOT, threshold=-1
+        )
 
         num_batches = 10
         for _ in range(num_batches):
@@ -125,11 +129,14 @@ class TestUtils(ProfilingTestCase):
         for dataset_loader in [load_bike, load_boston, load_california, load_titanic]:
             dataset, _ = dataset_loader(random_seed=0)
             preprocessor = StandardPreprocessor(
-                categorical=dataset.categorical, continuous=dataset.continuous)
+                categorical=dataset.categorical, continuous=dataset.continuous
+            )
 
             output_len = [None]
+
             def cb_shape_change(change_map: ChangeMap):
                 output_len[0] = change_map.output_len
+
             preprocessor.add_output_shape_changed_callback(cb_shape_change)
 
             for _ in range(100):
@@ -138,7 +145,8 @@ class TestUtils(ProfilingTestCase):
                     X_ = preprocessor.fit(X).transform(X)
                     self.assertEqual(output_len[0], len(X_), dataset.name)
                 except Exception as ex:
-                    print('Preprocessing dataset %s failed' % dataset.name)
+                    print("Preprocessing dataset %s failed" % dataset.name)
                     raise ex
+
 
 main()

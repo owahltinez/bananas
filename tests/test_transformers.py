@@ -1,4 +1,4 @@
-''' Test Transformers Module '''
+""" Test Transformers Module """
 
 import itertools
 import numpy
@@ -6,10 +6,19 @@ import numpy
 from bananas.changemap.changemap import ChangeMap
 from bananas.core.pipeline import Pipeline, PipelineStep
 from bananas.testing.learners import test_learner
-from bananas.testing.generators import \
-    generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
-    generate_array_int_floats, generate_array_uints, generate_array_nones, generate_array_strings, \
-    generate_images, generate_onehot_matrix, generate_array_infinities
+from bananas.testing.generators import (
+    generate_array_booleans,
+    generate_array_chars,
+    generate_array_floats,
+    generate_array_ints,
+    generate_array_int_floats,
+    generate_array_uints,
+    generate_array_nones,
+    generate_array_strings,
+    generate_images,
+    generate_onehot_matrix,
+    generate_array_infinities,
+)
 from bananas.testing.dummy import DummyTransformer
 from bananas.transformers.drop import FeatureDrop
 from bananas.transformers.encoders import LabelEncoder, OneHotEncoder
@@ -22,7 +31,6 @@ from .test_profiling import ProfilingTestCase, main
 
 # pylint: disable=missing-docstring
 class TestUtils(ProfilingTestCase):
-
     def test_transformer_builtin(self):
         for transformer in [FeatureDrop, VarianceThreshold]:
             self.assertTrue(test_learner(transformer, columns=[]))
@@ -45,7 +53,10 @@ class TestUtils(ProfilingTestCase):
 
         # Setup output change callback
         callback = [False]
-        def cb(change_map: ChangeMap): callback[0] = True
+
+        def cb(change_map: ChangeMap):
+            callback[0] = True
+
         dropper.add_output_shape_changed_callback(cb)
 
         output = dropper.fit(data_concat).transform(data_concat)
@@ -61,9 +72,12 @@ class TestUtils(ProfilingTestCase):
     def test_feature_drop_twice_different(self):
         n = 100
         data = [numpy.ones(n) * i for i in range(4)]
-        pipeline = Pipeline([
-            PipelineStep(name=1, learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(name=2, learner=FeatureDrop, kwargs={'columns': [1]})])
+        pipeline = Pipeline(
+            [
+                PipelineStep(name=1, learner=FeatureDrop, kwargs={"columns": [0]}),
+                PipelineStep(name=2, learner=FeatureDrop, kwargs={"columns": [1]}),
+            ]
+        )
 
         output = pipeline.fit(data).transform(data)
         self.assertEqual(2, len(output))
@@ -78,9 +92,12 @@ class TestUtils(ProfilingTestCase):
     def test_feature_drop_twice_same(self):
         n = 100
         data = [numpy.ones(n) * i for i in range(4)]
-        pipeline = Pipeline([
-            PipelineStep(name=1, learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(name=2, learner=FeatureDrop, kwargs={'columns': [0]})])
+        pipeline = Pipeline(
+            [
+                PipelineStep(name=1, learner=FeatureDrop, kwargs={"columns": [0]}),
+                PipelineStep(name=2, learner=FeatureDrop, kwargs={"columns": [0]}),
+            ]
+        )
 
         # The expectation is that dropping a column that no longer exists is a no-op
         output = pipeline.fit(data).transform(data)
@@ -91,10 +108,13 @@ class TestUtils(ProfilingTestCase):
     def test_feature_drop_thrice_different(self):
         n = 100
         data = [numpy.ones(n) * i for i in range(4)]
-        pipeline = Pipeline([
-            PipelineStep(name=1, learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(name=2, learner=FeatureDrop, kwargs={'columns': [1]}),
-            PipelineStep(name=3, learner=FeatureDrop, kwargs={'columns': [2]})])
+        pipeline = Pipeline(
+            [
+                PipelineStep(name=1, learner=FeatureDrop, kwargs={"columns": [0]}),
+                PipelineStep(name=2, learner=FeatureDrop, kwargs={"columns": [1]}),
+                PipelineStep(name=3, learner=FeatureDrop, kwargs={"columns": [2]}),
+            ]
+        )
 
         output = pipeline.fit(data).transform(data)
         self.assertEqual(1, len(output))
@@ -104,10 +124,13 @@ class TestUtils(ProfilingTestCase):
     def test_feature_drop_thrice_same(self):
         n = 100
         data = [numpy.ones(n) * i for i in range(4)]
-        pipeline = Pipeline([
-            PipelineStep(name=1, learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(name=2, learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(name=3, learner=FeatureDrop, kwargs={'columns': [0]})])
+        pipeline = Pipeline(
+            [
+                PipelineStep(name=1, learner=FeatureDrop, kwargs={"columns": [0]}),
+                PipelineStep(name=2, learner=FeatureDrop, kwargs={"columns": [0]}),
+                PipelineStep(name=3, learner=FeatureDrop, kwargs={"columns": [0]}),
+            ]
+        )
 
         # The expectation is that dropping a column that no longer exists is a no-op
         output = pipeline.fit(data).transform(data)
@@ -121,15 +144,18 @@ class TestUtils(ProfilingTestCase):
         data_1 = [numpy.random.random(n) * 10 for _ in range(4)]
         data_concat = data_0 + data_1
 
-        pipeline = Pipeline([
-            PipelineStep(name=1, learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(name=2, learner=MinMaxScaler, kwargs={'columns': [1, 2, 3]})])
+        pipeline = Pipeline(
+            [
+                PipelineStep(name=1, learner=FeatureDrop, kwargs={"columns": [0]}),
+                PipelineStep(name=2, learner=MinMaxScaler, kwargs={"columns": [1, 2, 3]}),
+            ]
+        )
 
         output = pipeline.fit(data_concat).transform(data_concat)
         self.assertEqual(4, len(output))
         self.assertGreaterEqual(output[-1].max(), 1)
         for i, col in enumerate(output[:-1]):
-            self.assertLessEqual(col.max(), 1, 'Column %d' % i)
+            self.assertLessEqual(col.max(), 1, "Column %d" % i)
 
     def test_feature_drop_following_encoder(self):
         n = 100
@@ -138,9 +164,12 @@ class TestUtils(ProfilingTestCase):
         data_1 = [generate_array_uints(n=n, max_int=10, random_seed=0)]
         data_concat = data_0 + data_1
 
-        pipeline = Pipeline([
-            PipelineStep(name=1, learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(name=2, learner=LabelEncoder, kwargs={'columns': {0: nums, 4: nums}})])
+        pipeline = Pipeline(
+            [
+                PipelineStep(name=1, learner=FeatureDrop, kwargs={"columns": [0]}),
+                PipelineStep(name=2, learner=LabelEncoder, kwargs={"columns": {0: nums, 4: nums}}),
+            ]
+        )
 
         output = pipeline.fit(data_concat).transform(data_concat)
         self.assertEqual(4, len(output))
@@ -153,9 +182,12 @@ class TestUtils(ProfilingTestCase):
         data_1 = [generate_array_uints(n=n, max_int=10, random_seed=0)]
         data_concat = data_0 + data_1 + data_0 + data_1
 
-        pipeline = Pipeline([
-            PipelineStep(name=1, learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(name=2, learner=OneHotEncoder, kwargs={'columns': {0: nums, 3: nums}})])
+        pipeline = Pipeline(
+            [
+                PipelineStep(name=1, learner=FeatureDrop, kwargs={"columns": [0]}),
+                PipelineStep(name=2, learner=OneHotEncoder, kwargs={"columns": {0: nums, 3: nums}}),
+            ]
+        )
 
         output = pipeline.fit(data_concat).transform(data_concat)
         self.assertEqual(12, len(output))
@@ -171,9 +203,12 @@ class TestUtils(ProfilingTestCase):
         data_1 = [numpy.random.random(n) for _ in range(4)]
         data_concat = data_0 + data_1
 
-        pipeline = Pipeline([
-            PipelineStep(name=1, learner=FeatureDrop, kwargs={'columns': [1, 2, 3]}),
-            PipelineStep(name=2, learner=OneHotEncoder, kwargs={'columns': {0: nums}})])
+        pipeline = Pipeline(
+            [
+                PipelineStep(name=1, learner=FeatureDrop, kwargs={"columns": [1, 2, 3]}),
+                PipelineStep(name=2, learner=OneHotEncoder, kwargs={"columns": {0: nums}}),
+            ]
+        )
 
         output = pipeline.fit(data_concat).transform(data_concat)
         self.assertEqual(len(nums) + 1, len(output))
@@ -189,10 +224,13 @@ class TestUtils(ProfilingTestCase):
         data_2 = [generate_array_uints(n=n, max_int=10, random_seed=0)]
         data_concat = data_0 + data_1 + data_2
 
-        pipeline = Pipeline([
-            PipelineStep(name=1, learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(name=2, learner=MinMaxScaler, kwargs={'columns': [1, 2, 3]}),
-            PipelineStep(name=3, learner=LabelEncoder, kwargs={'columns': {4: nums}})])
+        pipeline = Pipeline(
+            [
+                PipelineStep(name=1, learner=FeatureDrop, kwargs={"columns": [0]}),
+                PipelineStep(name=2, learner=MinMaxScaler, kwargs={"columns": [1, 2, 3]}),
+                PipelineStep(name=3, learner=LabelEncoder, kwargs={"columns": {4: nums}}),
+            ]
+        )
 
         output = pipeline.fit(data_concat).transform(data_concat)
         self.assertEqual(4, len(output))
@@ -210,22 +248,22 @@ class TestUtils(ProfilingTestCase):
 
         all_steps = (
             PipelineStep(learner=DummyTransformer, kwargs={}),
-            PipelineStep(learner=FeatureDrop, kwargs={'columns': [0]}),
-            PipelineStep(learner=MinMaxScaler, kwargs={'columns': [1, 2, 3]}),
-            PipelineStep(learner=LabelEncoder, kwargs={'columns': {0: [], 4: nums}}),
-            PipelineStep(learner=VarianceThreshold, kwargs={'columns': [1, 2, 3]}))
+            PipelineStep(learner=FeatureDrop, kwargs={"columns": [0]}),
+            PipelineStep(learner=MinMaxScaler, kwargs={"columns": [1, 2, 3]}),
+            PipelineStep(learner=LabelEncoder, kwargs={"columns": {0: [], 4: nums}}),
+            PipelineStep(learner=VarianceThreshold, kwargs={"columns": [1, 2, 3]}),
+        )
 
-        transformers = \
-            itertools.combinations_with_replacement(all_steps, len(all_steps))
+        transformers = itertools.combinations_with_replacement(all_steps, len(all_steps))
         for steps in transformers:
             pipeline = Pipeline(steps)
             try:
                 pipeline.fit(data_concat).transform(data_concat)
             except Exception as ex:
-                print('Pipeline failed')
+                print("Pipeline failed")
                 for step in pipeline.steps:
-                    print(step, getattr(step[1], 'classes_', None))
-                raise(ex)
+                    print(step, getattr(step[1], "classes_", None))
+                raise (ex)
 
     # TODO: test one-hot encoder after an input change that affects one of its columns
 

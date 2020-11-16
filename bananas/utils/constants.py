@@ -1,6 +1,7 @@
-''' Module with constants used across a number of utilities, methods and classes '''
+""" Module with constants used across a number of utilities, methods and classes """
 
 from ..utils import __NUMPY_AVAILABLE__
+
 if __NUMPY_AVAILABLE__:
     import numpy
 
@@ -29,12 +30,13 @@ else:
 
 
 # These are the dtypes that estimators can expect
-ALLOWED_DTYPES = [dtype[0] for dtype in
-                  [DTYPE_BOOL, DTYPE_FLOAT, DTYPE_INT, DTYPE_STR, DTYPE_UINT8]]
+ALLOWED_DTYPES = [
+    dtype[0] for dtype in [DTYPE_BOOL, DTYPE_FLOAT, DTYPE_INT, DTYPE_STR, DTYPE_UINT8]
+]
 
 # Used for classifying datasets as well as determining the size of sample drawings
-SAMPLE_SIZE_SMALL = int(1E3)
-SAMPLE_SIZE_LARGE = int(1E6)
+SAMPLE_SIZE_SMALL = int(1e3)
+SAMPLE_SIZE_LARGE = int(1e6)
 
 # Used for determining if one-hot encoder is the most efficient way to encode a categorical feature
 ONEHOT_MAX_CLASSES = 8

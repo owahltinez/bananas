@@ -6,14 +6,19 @@ from ..utils.arrays import ARRAY_LIKE
 
 
 class _Preprocessor(Pipeline):
-    '''
+    """
     Internal class used as a base for all preprocessors targeting a mix of categorical and
     continuous features.
-    '''
+    """
 
-    def __init__(self, categorical: (dict, ARRAY_LIKE) = None,
-                 continuous: (dict, ARRAY_LIKE) = None, verbose: bool = False, **kwargs):
-        '''
+    def __init__(
+        self,
+        categorical: (dict, ARRAY_LIKE) = None,
+        continuous: (dict, ARRAY_LIKE) = None,
+        verbose: bool = False,
+        **kwargs
+    ):
+        """
         Parameters
         ----------
         categorical : (dict, ARRAY_LIKE)
@@ -23,7 +28,7 @@ class _Preprocessor(Pipeline):
             Columns that contain continuous data. If a dict is passed, its values are ignored.
         verbose : Boolean
             Prints debug info
-        '''
+        """
         self.verbose = verbose
 
         # Default to no categorical columns
@@ -47,8 +52,8 @@ class _Preprocessor(Pipeline):
 
         # If no steps were added, add dummy transformer
         if not steps:
-            steps.append(PipelineStep(name='dummy', learner=DummyTransformer))
-            self.print('Initialize dummy step')
+            steps.append(PipelineStep(name="dummy", learner=DummyTransformer))
+            self.print("Initialize dummy step")
 
         # Initialize parent's pipeline
         # psteps = [(name, klass) for name, klass, kwargs in steps]
@@ -56,5 +61,6 @@ class _Preprocessor(Pipeline):
         super().__init__(steps, verbose=verbose)
 
     def _init_steps(self, **kwargs) -> Iterable[PipelineStep]:
-        raise NotImplementedError('Subclasses of `%s` must override method `%s`' %
-                                  self.__class__.__name__, '_init_steps')
+        raise NotImplementedError(
+            "Subclasses of `%s` must override method `%s`" % self.__class__.__name__, "_init_steps"
+        )

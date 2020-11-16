@@ -1,4 +1,4 @@
-'''
+"""
 Extensions of `Learner` objects whose object is to transform data.
 
 Transformers are `Learner` objects that *may* modify the data in some way and, instead of the usual
@@ -24,7 +24,7 @@ feature may take. This is done so we can accommodate for potential unseen sample
 and avoid additional shape changes. If no arguments `columns` is given, it defaults to applying the
 transformation to all columns. We can also pass an empty list `[]` to explicitly tell the
 transformer that no features should be transformed.
-'''
+"""
 
 from .base import BaseTransformer
 from .encoders import LabelEncoder, OneHotEncoder

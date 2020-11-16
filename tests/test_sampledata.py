@@ -1,9 +1,16 @@
-''' Test Datasets Module '''
+""" Test Datasets Module """
 
 import random
 from bananas.statistics import RandomState
 from bananas.sampledata.local import load_bike, load_boston, load_california, load_titanic
-from bananas.sampledata.synthetic import new_labels, new_line, new_poly, new_trig, new_wave, new_mat9
+from bananas.sampledata.synthetic import (
+    new_labels,
+    new_line,
+    new_poly,
+    new_trig,
+    new_wave,
+    new_mat9,
+)
 from bananas.utils.constants import SAMPLE_SIZE_SMALL
 
 from .test_profiling import ProfilingTestCase, main
@@ -11,7 +18,6 @@ from .test_profiling import ProfilingTestCase, main
 
 # pylint: disable=missing-docstring
 class TestUtils(ProfilingTestCase):
-
     def test_synthetic(self):
         rng = RandomState(0)
         for ds_fn in (new_labels, new_line, new_mat9, new_poly, new_trig, new_wave):
@@ -34,5 +40,6 @@ class TestUtils(ProfilingTestCase):
             self.assertGreater(len(sample_train_target), 100)
             self.assertGreater(len(sample_test_X[0]), 100)
             self.assertGreater(len(sample_test_target), 100)
+
 
 main()

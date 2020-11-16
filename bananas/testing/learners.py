@@ -1,9 +1,9 @@
-'''
+"""
 This library comes with a comprehensive testing suite that checks for API compliance, input type
 handling, change map handling, and more. Not all tests are run for every learner; tests specific
 to certain estimators like [supervised learners](../core/index.md#supervised) or [transformers](
 ../transformers/index.md) are only run when the learner instance is of the corresponding type.
-'''
+"""
 
 import warnings
 from inspect import signature, Parameter
@@ -16,17 +16,26 @@ from ..training.train_history import TrainHistory
 from ..transformers.base import BaseTransformer
 from ..utils.arrays import check_array, unique
 from ..utils.misc import warn_with_traceback
-from .generators import \
-    generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
-    generate_array_int_floats, generate_array_uints, generate_array_nones, generate_array_strings, \
-    generate_images, generate_onehot_matrix, generate_array_infinities
+from .generators import (
+    generate_array_booleans,
+    generate_array_chars,
+    generate_array_floats,
+    generate_array_ints,
+    generate_array_int_floats,
+    generate_array_uints,
+    generate_array_nones,
+    generate_array_strings,
+    generate_images,
+    generate_onehot_matrix,
+    generate_array_infinities,
+)
 
 # Number of samples in the test data
 TEST_SAMPLE_SIZE = 1024
 
 
 def test_learner(learner_type: (type, Learner), **learner_kwargs):
-    '''
+    """
     Performs a battery of tests against the provided learner. If the learner must be initialized
     with certain parameters, those can be passed to this function too.
 
@@ -36,7 +45,7 @@ def test_learner(learner_type: (type, Learner), **learner_kwargs):
         TODO
     learner_kwargs
         TODO
-    '''
+    """
 
     # Change warnings behavior to display stack trace
     showwarning = warnings.showwarning
@@ -48,12 +57,13 @@ def test_learner(learner_type: (type, Learner), **learner_kwargs):
 
     # Set random state via keyword argument for all learners if they support it
     params = signature(learner_type.__init__).parameters
-    if 'random_seed' in params.keys() or any(
-        [param.kind == Parameter.VAR_KEYWORD for param in params.values()]):
-        learner_kwargs['random_seed'] = 0
+    if "random_seed" in params.keys() or any(
+        [param.kind == Parameter.VAR_KEYWORD for param in params.values()]
+    ):
+        learner_kwargs["random_seed"] = 0
 
     # Test options apply to all tests
-    test_opts = {'learner_class': learner_type, 'learner_kwargs': learner_kwargs}
+    test_opts = {"learner_class": learner_type, "learner_kwargs": learner_kwargs}
 
     # Pick test suites based on subclasses
     test_suites = []
@@ -77,17 +87,19 @@ def test_learner(learner_type: (type, Learner), **learner_kwargs):
 
     # Display errors
     for err in result.errors:
-        print('\n%s\n' % err[1])
+        print("\n%s\n" % err[1])
     for fail in result.failures:
-        print('\n%s\n' % fail[1])
+        print("\n%s\n" % fail[1])
 
     # Restore warning behavior
     warnings.showwarning = showwarning
 
     # If any errors or failures, raise the exception
-    assert not result.errors and not result.failures, ('One or more tests failed. Please see ' \
-        'output for all Tracebacks.\n\n%s\n' %
-        (result.errors[0][1] if result.errors else result.failures[0][1]))
+    assert not result.errors and not result.failures, (
+        "One or more tests failed. Please see "
+        "output for all Tracebacks.\n\n%s\n"
+        % (result.errors[0][1] if result.errors else result.failures[0][1])
+    )
 
     return True
 
@@ -95,42 +107,48 @@ def test_learner(learner_type: (type, Learner), **learner_kwargs):
 def assert_predictions_match_cloned_learner(test: TestCase, y1, y2):
     y1, y2 = list(y1[:100]), list(y2[:100])  # limit amount of comparisons for perf and put in list
     test.assertListEqual(
-        y1, y2, ('Calling `predict` after fitting the same set of data to a cloned learner should '
-                 'yield the same result'))
+        y1,
+        y2,
+        (
+            "Calling `predict` after fitting the same set of data to a cloned learner should "
+            "yield the same result"
+        ),
+    )
 
 
 class _LearnerTests(TestCase):
-
     def __init__(self, learner_class: type, learner_kwargs: dict):
         super().__init__()
         self.learner_class = learner_class
         self.learner_kwargs = learner_kwargs
 
     def runTest(self):
-        for test_name in [key for key in dir(self) if key.startswith('test_')]:
+        for test_name in [key for key in dir(self) if key.startswith("test_")]:
             test_case = getattr(self, test_name)
             try:
                 test_case()
             except Exception as err:
-                print('%s_%s ... fail' % (self.learner_class.__name__, test_name))
+                print("%s_%s ... fail" % (self.learner_class.__name__, test_name))
                 raise err
-            print('%s_%s ... ok' % (self.learner_class.__name__, test_name))
+            print("%s_%s ... ok" % (self.learner_class.__name__, test_name))
 
     def _get_learner(self, **learner_kwargs):
-        learner: Learner = self.learner_class(
-            **{**self.learner_kwargs, **learner_kwargs})
+        learner: Learner = self.learner_class(**{**self.learner_kwargs, **learner_kwargs})
         return learner
 
 
 class LearnerTests(_LearnerTests):
-    ''' Basic tests for the base Learner class '''
+    """ Basic tests for the base Learner class """
 
     def test_learner_calls_init(self):
 
         # Test whether parent's init is called by monkey patching it
         flag = [False]
         __init_old__ = Learner.__init__
-        def __init_new__(self, **kwargs): flag[0] = True
+
+        def __init_new__(self, **kwargs):
+            flag[0] = True
+
         Learner.__init__ = __init_new__
 
         # Initialize learner, which will trigger new __init__
@@ -140,11 +158,11 @@ class LearnerTests(_LearnerTests):
         Learner.__init__ = __init_old__
 
         # Perform assertion
-        self.assertEqual(True, flag[0], 'Learner must call super().__init__() method')
+        self.assertEqual(True, flag[0], "Learner must call super().__init__() method")
 
 
 class UnsupervisedLearnerTests(_LearnerTests):
-    ''' Tests designed for unsupervised learners. '''
+    """ Tests designed for unsupervised learners. """
 
     def test_unsupervised_signature(self):
         learner: UnsupervisedLearner = self._get_learner()
@@ -155,8 +173,9 @@ class UnsupervisedLearnerTests(_LearnerTests):
         self.assertEqual(learner, learner.fit(X))
 
         # Fit and predict only take X, or return NotImplementedError
-        for func in ('fit', 'predict'):
-            if not hasattr(learner, func): continue
+        for func in ("fit", "predict"):
+            if not hasattr(learner, func):
+                continue
             try:
                 self.assertTrue(getattr(learner, func)(X) is not None)
             except NotImplementedError:
@@ -164,8 +183,9 @@ class UnsupervisedLearnerTests(_LearnerTests):
             self.assertRaises(TypeError, lambda: getattr(learner, func)(X, y))
 
         # score takes X, y, or returns NotImplementedError
-        for func in ('score',):
-            if not hasattr(learner, func): continue
+        for func in ("score",):
+            if not hasattr(learner, func):
+                continue
             try:
                 self.assertTrue(getattr(learner, func)(X, y) is not None)
             except NotImplementedError:
@@ -191,12 +211,17 @@ class UnsupervisedLearnerTests(_LearnerTests):
     def test_unsupervised_batch_size_changed(self):
         learner: UnsupervisedLearner = self._get_learner()
         features = [
-            (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
-                generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)),
-            (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1),
-                generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0).reshape(2, -1))]
-            # (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1, 2),
-            #    generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)).reshape(2, -1, 2)]
+            (
+                generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
+                generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0),
+            ),
+            (
+                generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1),
+                generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0).reshape(2, -1),
+            ),
+        ]
+        # (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1, 2),
+        #    generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)).reshape(2, -1, 2)]
 
         for X1, X2 in features:
             learner = self._get_learner()
@@ -207,7 +232,7 @@ class UnsupervisedLearnerTests(_LearnerTests):
 
 
 class SupervisedLearnerTests(_LearnerTests):
-    ''' Tests designed for supervised learners. '''
+    """ Tests designed for supervised learners. """
 
     def test_supervised_signature(self):
         learner: SupervisedLearner = self._get_learner()
@@ -218,12 +243,12 @@ class SupervisedLearnerTests(_LearnerTests):
         self.assertEqual(learner, learner.fit(X, y))
 
         # Fit and score take X, y
-        for func in ('fit', 'score'):
+        for func in ("fit", "score"):
             self.assertTrue(getattr(learner, func)(X, y) is not None)
             self.assertRaises(TypeError, lambda: getattr(learner, func)(X))
 
         # Predict only takes X
-        for func in ('predict',):
+        for func in ("predict",):
             self.assertTrue(getattr(learner, func)(X) is not None)
             self.assertRaises(TypeError, lambda: getattr(learner, func)(X, y))
 
@@ -246,17 +271,27 @@ class SupervisedLearnerTests(_LearnerTests):
 
     def test_supervised_batch_size_changed(self):
         features = [
-            (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
-                generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)),
-            (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1),
-                generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0).reshape(2, -1))]
-            # (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1, 2),
-            #    generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)).reshape(2, -1, 2)]
+            (
+                generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
+                generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0),
+            ),
+            (
+                generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1),
+                generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0).reshape(2, -1),
+            ),
+        ]
+        # (generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0).reshape(2, -1, 2),
+        #    generate_array_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)).reshape(2, -1, 2)]
         targets = [
-            (generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
-                generate_array_int_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0)),
-            (generate_array_int_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0),
-                generate_array_int_floats(n=TEST_SAMPLE_SIZE // 4, random_seed=0))]
+            (
+                generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
+                generate_array_int_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0),
+            ),
+            (
+                generate_array_int_floats(n=TEST_SAMPLE_SIZE // 2, random_seed=0),
+                generate_array_int_floats(n=TEST_SAMPLE_SIZE // 4, random_seed=0),
+            ),
+        ]
 
         for (X1, X2), (y1, y2) in zip(features, targets):
             learner: SupervisedLearner = self._get_learner()
@@ -267,7 +302,7 @@ class SupervisedLearnerTests(_LearnerTests):
 
 
 class TransformerTests(_LearnerTests):
-    ''' Tests designed for transformers. '''
+    """ Tests designed for transformers. """
 
     def test_transformer_transform(self):
         learner: BaseTransformer = self._get_learner()
@@ -306,7 +341,7 @@ class TransformerTests(_LearnerTests):
             except NotImplementedError:
                 # Having a transformer that does not implement inverse_transform is OK
                 pass
-        self.assertTrue(success, 'fit-transform did not work for continuous or categorical data')
+        self.assertTrue(success, "fit-transform did not work for continuous or categorical data")
 
     def test_transformer_input_changed(self):
         learner: BaseTransformer = self._get_learner()
@@ -326,7 +361,7 @@ class TransformerTests(_LearnerTests):
 
 
 class RegressorTests(_LearnerTests):
-    ''' Tests designed for regressors. '''
+    """ Tests designed for regressors. """
 
     def test_regressor_fit_1D(self):
         features = [
@@ -334,14 +369,16 @@ class RegressorTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_ints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         targets = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_ints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -354,14 +391,16 @@ class RegressorTests(_LearnerTests):
             generate_array_int_floats(n=1, random_seed=0),
             generate_array_ints(n=1, random_seed=0),
             generate_array_uints(n=1, random_seed=0),
-            generate_array_booleans(n=1, random_seed=0)]
+            generate_array_booleans(n=1, random_seed=0),
+        ]
 
         targets = [
             generate_array_floats(n=1, random_seed=0),
             generate_array_int_floats(n=1, random_seed=0),
             generate_array_ints(n=1, random_seed=0),
             generate_array_uints(n=1, random_seed=0),
-            generate_array_booleans(n=1, random_seed=0)]
+            generate_array_booleans(n=1, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -375,14 +414,16 @@ class RegressorTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_ints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_uints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
+        ]
 
         targets = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_ints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -395,14 +436,16 @@ class RegressorTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
             generate_array_ints(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
             generate_array_uints(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
+        ]
 
         targets = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_ints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -420,14 +463,16 @@ class RegressorTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_ints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_uints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
+        ]
 
         targets = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_ints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -453,14 +498,16 @@ class RegressorTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_ints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_uints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
+        ]
 
         targets = [
             generate_array_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_ints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -480,7 +527,7 @@ class RegressorTests(_LearnerTests):
 
 
 class ClassifierTests(_LearnerTests):
-    ''' Tests designed for classifiers. '''
+    """ Tests designed for classifiers. """
 
     def test_classifier_fit_1D(self):
         features = [
@@ -488,7 +535,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_ints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         targets = [
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -496,7 +544,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_chars(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -509,7 +558,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_int_floats(n=1, random_seed=0),
             generate_array_ints(n=1, random_seed=0),
             generate_array_uints(n=1, random_seed=0),
-            generate_array_booleans(n=1, random_seed=0)]
+            generate_array_booleans(n=1, random_seed=0),
+        ]
 
         targets = [
             generate_array_int_floats(n=1, random_seed=0),
@@ -517,7 +567,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_uints(n=1, random_seed=0),
             generate_array_booleans(n=1, random_seed=0),
             generate_array_chars(n=1, random_seed=0),
-            generate_array_strings(n=1, random_seed=0)]
+            generate_array_strings(n=1, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -530,7 +581,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_ints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_uints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
+        ]
 
         targets = [
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -538,7 +590,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_chars(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -552,7 +605,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
             generate_array_ints(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
             generate_array_uints(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE * 3, random_seed=0).reshape(3, -1),
+        ]
 
         targets = [
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -560,7 +614,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_chars(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -578,7 +633,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_ints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_uints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
+        ]
 
         targets = [
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -586,7 +642,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_chars(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:
@@ -615,7 +672,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_int_floats(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_ints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
             generate_array_uints(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
-            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1)]
+            generate_array_booleans(n=TEST_SAMPLE_SIZE * 2, random_seed=0).reshape(2, -1),
+        ]
 
         targets = [
             generate_array_int_floats(n=TEST_SAMPLE_SIZE, random_seed=0),
@@ -623,7 +681,8 @@ class ClassifierTests(_LearnerTests):
             generate_array_uints(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_booleans(n=TEST_SAMPLE_SIZE, random_seed=0),
             generate_array_chars(n=TEST_SAMPLE_SIZE, random_seed=0),
-            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0)]
+            generate_array_strings(n=TEST_SAMPLE_SIZE, random_seed=0),
+        ]
 
         for X in features:
             for y in targets:

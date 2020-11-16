@@ -1,4 +1,4 @@
-''' Test ChangeMap Module '''
+""" Test ChangeMap Module """
 
 from bananas.changemap.changemap import ChangeMap
 from .test_profiling import ProfilingTestCase, main
@@ -6,7 +6,6 @@ from .test_profiling import ProfilingTestCase, main
 
 # pylint: disable=missing-docstring
 class TestUtils(ProfilingTestCase):
-
     def test_change_map_build(self):
 
         # Delete the first column

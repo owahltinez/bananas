@@ -1,4 +1,4 @@
-''' Image-related utility functions '''
+""" Image-related utility functions """
 # TODO: Add testing for this module
 
 import math
@@ -8,18 +8,22 @@ from typing import Tuple
 import numpy
 
 
-def normalize(img: numpy.ndarray, means: Tuple[float] = None,
-              stdevs: Tuple[float] = None) -> numpy.ndarray:
-    ''' Normalize an image by performing `(array - mean) / stdev` to each channel. '''
-    if means is None: means = [arr.mean() for arr in img]
-    if stdevs is None: stdevs = [arr.std() for arr in img]
-    assert img.ndim == 3, 'normalize function requires 3 channels in image, found %r' % img.shape
-    return numpy.asarray([(arr - means[i]) / stdevs[i]
-                          for i, arr in enumerate(img)], dtype=numpy.float64)
+def normalize(
+    img: numpy.ndarray, means: Tuple[float] = None, stdevs: Tuple[float] = None
+) -> numpy.ndarray:
+    """ Normalize an image by performing `(array - mean) / stdev` to each channel. """
+    if means is None:
+        means = [arr.mean() for arr in img]
+    if stdevs is None:
+        stdevs = [arr.std() for arr in img]
+    assert img.ndim == 3, "normalize function requires 3 channels in image, found %r" % img.shape
+    return numpy.asarray(
+        [(arr - means[i]) / stdevs[i] for i, arr in enumerate(img)], dtype=numpy.float64
+    )
 
 
 def pil_to_ndarray(img) -> numpy.ndarray:
-    ''' Converts a PIL.Image type to numpy.ndarray. '''
+    """ Converts a PIL.Image type to numpy.ndarray. """
     # Convert into ndarray type
     arr = numpy.array(img).astype(numpy.uint8)
 
@@ -32,9 +36,10 @@ def pil_to_ndarray(img) -> numpy.ndarray:
 
 
 def ndarray_to_pil(img: numpy.ndarray):
-    ''' Converts a numpy.ndarray type to a PIL.Image type. '''
+    """ Converts a numpy.ndarray type to a PIL.Image type. """
     from PIL import Image
-    assert img.dtype == numpy.uint8, 'Array must be of uint8 dtype'
+
+    assert img.dtype == numpy.uint8, "Array must be of uint8 dtype"
 
     # Early exit: 2D array does not need to take care of order of planes
     if img.ndim == 2:
@@ -48,7 +53,7 @@ def ndarray_to_pil(img: numpy.ndarray):
 
 
 def open_image(path: str, convert: str = None, channels: bool = False, uint8: bool = True):
-    ''' Opens an image given its path. Fails if PIL package is not installed. '''
+    """ Opens an image given its path. Fails if PIL package is not installed. """
     from PIL import Image
 
     # Open the image using PIL
@@ -77,12 +82,12 @@ def open_image(path: str, convert: str = None, channels: bool = False, uint8: bo
 
 
 def _get_image_size(img: numpy.ndarray):
-    ''' Returns the width and height of the image for the 2D and 3D case '''
+    """ Returns the width and height of the image for the 2D and 3D case """
     if img.ndim == 2:
         return tuple(img.shape)
     if img.ndim == 3:
         return tuple(img.shape[1:])
-    raise ValueError('Input image has more than 3 dimensions. Shape found: %r' % img.shape)
+    raise ValueError("Input image has more than 3 dimensions. Shape found: %r" % img.shape)
 
 
 def _set_image_pixel(img: numpy.ndarray, x: int, y: int, value: int):
@@ -92,7 +97,7 @@ def _set_image_pixel(img: numpy.ndarray, x: int, y: int, value: int):
     if img.ndim == 3:
         img[:, y, x] = value
         return
-    raise ValueError('Input image has more than 3 dimensions. Shape found: %r' % img.shape)
+    raise ValueError("Input image has more than 3 dimensions. Shape found: %r" % img.shape)
 
 
 def _get_image_pixel(img: numpy.ndarray, x: int, y: int):
@@ -100,7 +105,7 @@ def _get_image_pixel(img: numpy.ndarray, x: int, y: int):
         return img[y, x]
     if img.ndim == 3:
         return img[:, y, x]
-    raise ValueError('Input image has more than 3 dimensions. Shape found: %r' % img.shape)
+    raise ValueError("Input image has more than 3 dimensions. Shape found: %r" % img.shape)
 
 
 def _get_image_region(img: numpy.ndarray, x0: int, x1: int, y0: int, y1: int):
@@ -108,25 +113,29 @@ def _get_image_region(img: numpy.ndarray, x0: int, x1: int, y0: int, y1: int):
         return img[y0:y1, x0:x1]
     if img.ndim == 3:
         return img[:, y0:y1, x0:x1]
-    raise ValueError('Input image has more than 3 dimensions. Shape found: %r' % img.shape)
+    raise ValueError("Input image has more than 3 dimensions. Shape found: %r" % img.shape)
+
 
 class CropStrategy(Enum):
-    ''' Image cropping algorithm. '''
+    """ Image cropping algorithm. """
+
     TOP_LEFT = auto()
     CENTER = auto()
     RANDOM = auto()
 
 
 def _crop_pixel_count(img_height: int, img_width: int, crop_height: int, crop_width: int):
-    assert crop_height <= img_height and crop_width <= img_width, \
-        'Cropping region (%d x %d) must be smaller than image size (%d x %d)' % \
-        (crop_height, crop_width, img_height, img_width)
+    assert crop_height <= img_height and crop_width <= img_width, (
+        "Cropping region (%d x %d) must be smaller than image size (%d x %d)"
+        % (crop_height, crop_width, img_height, img_width)
+    )
 
     return img_height - crop_height, img_width - crop_width
 
 
 def _compute_crop_region(
-        method: CropStrategy, img_height: int, img_width: int, crop_height: int, crop_width: int):
+    method: CropStrategy, img_height: int, img_width: int, crop_height: int, crop_width: int
+):
     crop_y, crop_x = _crop_pixel_count(img_height, img_width, crop_height, crop_width)
 
     if method == CropStrategy.TOP_LEFT:
@@ -146,14 +155,14 @@ def _compute_crop_region(
 
 
 def crop(img: numpy.ndarray, height: int, width: int, method: CropStrategy = CropStrategy.CENTER):
-    '''
+    """
     Crops an image using the given strategy. Image is automatically resized if necessary.
-    '''
+    """
     img_h, img_w = _get_image_size(img)
 
     # If the image is smaller than desired crop region, scale it up preserving aspect ratio
     scale_aspect_ratio = max(height / float(img_h), width / float(img_w))
-    assert scale_aspect_ratio <= 1, 'Crop region is larger than image size'
+    assert scale_aspect_ratio <= 1, "Crop region is larger than image size"
     # if scale_aspect_ratio > 1:
     #     img = scale(img, round(img_h * scale_aspect_ratio), round(img_w * scale_aspect_ratio))
     #     img_h, img_w = _get_image_size(img)
@@ -163,7 +172,8 @@ def crop(img: numpy.ndarray, height: int, width: int, method: CropStrategy = Cro
 
 
 class ScalingMethod(Enum):
-    ''' Image scaling algorithm '''
+    """ Image scaling algorithm """
+
     NEAREST_NEIGHBOR = auto()
 
 
@@ -184,52 +194,61 @@ def _scale_nearest_neighbor(img: numpy.ndarray, height: int, width: int):
     return img_out
 
 
-def scale(img: numpy.ndarray, height: int, width: int,
-          method: ScalingMethod = ScalingMethod.NEAREST_NEIGHBOR) -> numpy.ndarray:
-    ''' Scales an image using the provided method, e.g. nearest neighbor. '''
+def scale(
+    img: numpy.ndarray,
+    height: int,
+    width: int,
+    method: ScalingMethod = ScalingMethod.NEAREST_NEIGHBOR,
+) -> numpy.ndarray:
+    """ Scales an image using the provided method, e.g. nearest neighbor. """
 
     if method == ScalingMethod.NEAREST_NEIGHBOR:
         return _scale_nearest_neighbor(img, height=height, width=width)
     else:
-        raise ValueError('Unknown scaling method requested: %r' % method)
+        raise ValueError("Unknown scaling method requested: %r" % method)
 
 
-def rotate(img: numpy.ndarray, rotation_degrees: int,
-           fill_color_rgb: Tuple[int, int, int] = (255,) * 3) -> numpy.ndarray:
-    ''' Rotates an image by `rotation_degrees` and fills the corners with `fill_color_rgb` '''
+def rotate(
+    img: numpy.ndarray, rotation_degrees: int, fill_color_rgb: Tuple[int, int, int] = (255,) * 3
+) -> numpy.ndarray:
+    """ Rotates an image by `rotation_degrees` and fills the corners with `fill_color_rgb` """
     from PIL import Image
+
     # Original image in PIL.Image format
     im_orig = ndarray_to_pil(img)
     # Filled image the same size as the original image
-    im_filled_orig = Image.new('RGBA', im_orig.size, tuple([*fill_color_rgb, 255]))
+    im_filled_orig = Image.new("RGBA", im_orig.size, tuple([*fill_color_rgb, 255]))
     # Filled image with rotation applied
     im_filled_rotated = im_filled_orig.rotate(rotation_degrees)
     # Filled image same size as post-rotated image
-    im_filled_post = Image.new('RGBA', im_filled_rotated.size, tuple([*fill_color_rgb, 255]))
+    im_filled_post = Image.new("RGBA", im_filled_rotated.size, tuple([*fill_color_rgb, 255]))
     # Create a composite image using the alpha layer of im_white_rotated as a mask
-    im_output = Image.composite(
-        im_orig.rotate(rotation_degrees), im_filled_post, im_filled_rotated)
+    im_output = Image.composite(im_orig.rotate(rotation_degrees), im_filled_post, im_filled_rotated)
     # Output image with same color mode as original
     return pil_to_ndarray(im_output.convert(im_orig.mode))
 
 
 def rgb_to_grayscale(img: numpy.ndarray):
-    ''' Converts an image with 3 channels from RGB to grayscale color space '''
-    assert img.ndim == 3, 'Image expected to have 3 channels for RGB'
+    """ Converts an image with 3 channels from RGB to grayscale color space """
+    assert img.ndim == 3, "Image expected to have 3 channels for RGB"
     return img[:, :, 0] * 0.2126 + img[:, :, 0] * 0.7152 + img[:, :, 0] * 0.0722
 
 
-def resize_canvas(img: numpy.ndarray, height: int, width: int,
-                  fill_color_rgb: Tuple[int, int, int] = (255,) * 3) -> numpy.ndarray:
-    ''' Resizes the canvas of an image, cropping the image if necessary '''
+def resize_canvas(
+    img: numpy.ndarray, height: int, width: int, fill_color_rgb: Tuple[int, int, int] = (255,) * 3
+) -> numpy.ndarray:
+    """ Resizes the canvas of an image, cropping the image if necessary """
     if height < img.shape[0]:
         img = crop(img, height, img.shape[1], CropStrategy.TOP_LEFT)
     if width < img.shape[1]:
         img = crop(img, img.shape[0], width, CropStrategy.TOP_LEFT)
 
     rgb = img.ndim == 3
-    fill_color = fill_color_rgb if rgb else \
-        math.ceil(rgb_to_grayscale(numpy.array(fill_color_rgb).reshape(1, 1, 3)))
+    fill_color = (
+        fill_color_rgb
+        if rgb
+        else math.ceil(rgb_to_grayscale(numpy.array(fill_color_rgb).reshape(1, 1, 3)))
+    )
     canvas_shape = (height, width, 3) if rgb else (height, width)
     img_new = numpy.ones(canvas_shape, dtype=img.dtype) * fill_color
 

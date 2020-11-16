@@ -1,12 +1,21 @@
-''' Test Transformers Module '''
+""" Test Transformers Module """
 
 import numpy
 
 from bananas.testing.learners import test_learner
-from bananas.testing.generators import \
-    generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
-    generate_array_int_floats, generate_array_uints, generate_array_nones, generate_array_strings, \
-    generate_images, generate_onehot_matrix, generate_array_infinities
+from bananas.testing.generators import (
+    generate_array_booleans,
+    generate_array_chars,
+    generate_array_floats,
+    generate_array_ints,
+    generate_array_int_floats,
+    generate_array_uints,
+    generate_array_nones,
+    generate_array_strings,
+    generate_images,
+    generate_onehot_matrix,
+    generate_array_infinities,
+)
 from bananas.transformers.scalers import MinMaxScaler, StandardScaler
 
 from .test_profiling import ProfilingTestCase, main
@@ -14,10 +23,8 @@ from .test_profiling import ProfilingTestCase, main
 
 # pylint: disable=missing-docstring
 class TestUtils(ProfilingTestCase):
-
     def test_transformer_builtin(self):
-        for transformer in [
-            MinMaxScaler, StandardScaler]:
+        for transformer in [MinMaxScaler, StandardScaler]:
             self.assertTrue(test_learner(transformer))
 
     def test_scaler_minmax(self):
@@ -224,5 +231,6 @@ class TestUtils(ProfilingTestCase):
             norm = scaler.transform([numpy.vstack([ones * i, ones * -i])])
             self.assertAlmostEqual(norm[0].min(), -1)
             self.assertAlmostEqual(norm[0].max(), 1)
+
 
 main()

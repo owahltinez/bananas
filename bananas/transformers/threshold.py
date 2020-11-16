@@ -1,11 +1,12 @@
-''' Threshold-based transformers '''
+""" Threshold-based transformers """
 
 from typing import Iterable
 from ..changemap.changemap import ChangeMap
 from .running_stats import RunningStats
 
+
 class VarianceThreshold(RunningStats):
-    '''
+    """
     A common technique to discard features that do not add a lot of value to the final output is to
     evaluate their total variance and apply a threshold so those features that fall below the specified
     limit can be dropped from the output. While this could be done at a prior phase, doing it as a
@@ -34,11 +35,12 @@ class VarianceThreshold(RunningStats):
     # Output columns: 1
     # Input matches output: True
     ```
-    '''
+    """
 
-    def __init__(self, columns: (dict, Iterable[int]) = None, threshold: float = 1E-2,
-                 verbose: bool = False):
-        '''
+    def __init__(
+        self, columns: (dict, Iterable[int]) = None, threshold: float = 1e-2, verbose: bool = False
+    ):
+        """
         Parameters
         ----------
         columns : dict, Iterable[int]
@@ -47,7 +49,7 @@ class VarianceThreshold(RunningStats):
             TODO
         verbose : bool
             TODO
-        '''
+        """
         super().__init__(threshold=threshold, columns=columns, verbose=verbose)
         self.threshold = threshold
 
@@ -81,9 +83,9 @@ class VarianceThreshold(RunningStats):
             input_len = len(X) - len(self.idx_del_)
             change_map = ChangeMap(input_len, idx_del=idx_del_out, idx_add=idx_add_out)
 
-            self.print('Triggered output change, dropping:')
+            self.print("Triggered output change, dropping:")
             for i in idx_del:
-                self.print('Column: %d\tVariance: %.05f' % (i, self.variance_[i]))
+                self.print("Column: %d\tVariance: %.05f" % (i, self.variance_[i]))
 
             self.idx_del_ = idx_del
             self.on_output_shape_changed(change_map)
@@ -91,29 +93,31 @@ class VarianceThreshold(RunningStats):
         return output
 
     def inverse_transform(self, X):
-        raise NotImplementedError('Inverse transformation not supported by this transformer')
+        raise NotImplementedError("Inverse transformation not supported by this transformer")
 
     def on_input_shape_changed(self, change_map: ChangeMap):
-        self.print('Input changed: %r' % change_map)
+        self.print("Input changed: %r" % change_map)
 
         # Early exit: fresh transformer, just propagate changes downstream
         if self.fresh_transformer_:
             self.on_output_shape_changed(change_map)
             self._input_change_column_adapter(
-                change_map, ['columns_', 'input_dtype_', 'input_shape_', 'idx_del_'])
+                change_map, ["columns_", "input_dtype_", "input_shape_", "idx_del_"]
+            )
             return
 
         # First reverse changes previously sent downstream
         self.on_output_shape_changed(
-            ChangeMap(change_map.input_len - len(self.idx_del_), idx_add=self.idx_del_.keys()))
+            ChangeMap(change_map.input_len - len(self.idx_del_), idx_add=self.idx_del_.keys())
+        )
 
         # Send new change downstream
         self.on_output_shape_changed(change_map)
 
         # Adapt feature changes by parent and by our own attributes
         self._input_change_column_adapter(
-            change_map, ['columns_', 'input_dtype_', 'input_shape_', 'idx_del_'])
+            change_map, ["columns_", "input_dtype_", "input_shape_", "idx_del_"]
+        )
 
         # Send adapted output change
-        self.on_output_shape_changed(
-            ChangeMap(change_map.output_len, idx_del=self.idx_del_.keys()))
+        self.on_output_shape_changed(ChangeMap(change_map.output_len, idx_del=self.idx_del_.keys()))

@@ -1,4 +1,4 @@
-''' Stats Package '''
+""" Stats Package """
 
 from .loss import LossFunction
 from .random import RandomState

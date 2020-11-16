@@ -1,16 +1,17 @@
-'''
+"""
 Statistical windowing functions, used for simple running stats use cases that don't require a
 full-blown transformer.
-'''
+"""
 
 from typing import List
 from .basic import mean, median, variance
 
 
 class WindowStats:
-    '''
+    """
     Keeps track of basic statistics using only the last `window_size` samples.
-    '''
+    """
+
     min_: float
     max_: float
     mean_: float
@@ -22,10 +23,10 @@ class WindowStats:
         self._window_size = window_size
 
     def push(self, sample: float):
-        '''
+        """
         Add a sample to this object's history. If we exceed the window size, the oldest sample is
         removed.
-        '''
+        """
         while len(self.history_) >= self._window_size:
             self.history_.pop(0)
 

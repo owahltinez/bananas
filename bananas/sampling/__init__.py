@@ -1,4 +1,4 @@
-'''
+"""
 Utilities that perform sampling of data using arbitrary criteria.
 
 Sampling is a fundamental part of learning large amounts of data which may not fit in
@@ -53,7 +53,7 @@ function to retrieve the indices and then the values are indexed from the input 
 sampler = OrderedSampler(dataset)
 batch = sampler.indices()  # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 ```
-'''
+"""
 
 from enum import Enum, auto
 from .ordered import OrderedSampler

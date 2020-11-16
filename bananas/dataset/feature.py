@@ -1,24 +1,38 @@
 from typing import Any
 from ..sampling.strategy import SamplingStrategy, ReplaceStrategy
-from ..utils.arrays import argwhere, check_array, flatten, is_null, shape_of_array, take_any, \
-                           unique, value_counts
+from ..utils.arrays import (
+    argwhere,
+    check_array,
+    flatten,
+    is_null,
+    shape_of_array,
+    take_any,
+    unique,
+    value_counts,
+)
 from ..utils.constants import ARRAY_LIKE, SAMPLE_SIZE_SMALL
 from ..utils.images import open_image
 from .datatype import DataType
 
 
 class Feature(object):
-    '''
+    """
     This class represents a distinct feature. A set of features form a dataset. Each feature is
     normally a single column but it can be composed of two or more columns; for example images and
     one-hot encodings are multi-column single features.
-    '''
+    """
 
-    def __init__(self, values: ARRAY_LIKE, kind: DataType = None, name: str = None,
-                 replace_strategy: ReplaceStrategy = ReplaceStrategy.MEAN,
-                 sample_size: int = SAMPLE_SIZE_SMALL, sampling_method: SamplingStrategy = None,
-                 **sampling_kwargs):
-        '''
+    def __init__(
+        self,
+        values: ARRAY_LIKE,
+        kind: DataType = None,
+        name: str = None,
+        replace_strategy: ReplaceStrategy = ReplaceStrategy.MEAN,
+        sample_size: int = SAMPLE_SIZE_SMALL,
+        sampling_method: SamplingStrategy = None,
+        **sampling_kwargs
+    ):
+        """
         Parameters
         ----------
         values : ARRAY_LIKE
@@ -33,10 +47,11 @@ class Feature(object):
             Method used to draw samples from the input values
         sampling_kwargs : dict
             Arguments passed to the sampling constructor
-        '''
+        """
         # assert isinstance(values, ARRAY_LIKE), \
-        assert hasattr(values, '__getitem__'), \
-            'Parameter `values` must be array-like, found %r' % type(values)
+        assert hasattr(
+            values, "__getitem__"
+        ), "Parameter `values` must be array-like, found %r" % type(values)
 
         # Save internal variables
         self.name = name
@@ -54,8 +69,9 @@ class Feature(object):
 
         # Get the feature kind from it
         self.kind: DataType = DataType.parse(self.input_sample) if kind is None else kind
-        assert isinstance(self.kind, DataType) and self.kind != DataType.UNKNOWN, \
-            'Unknown data kind found: %r' % self.kind
+        assert isinstance(self.kind, DataType) and self.kind != DataType.UNKNOWN, (
+            "Unknown data kind found: %r" % self.kind
+        )
 
         # Store replacement for NaN values as we draw samples
         self.replace_strategy = replace_strategy
@@ -84,6 +100,7 @@ class Feature(object):
             # Use transformer to compute sample stats
             # NOTE: import needs to be done here to avoid circular dependency
             from ..transformers.running_stats import RunningStats
+
             sample_stats = RunningStats(columns=[0]).fit(input_sample_)
             self.sample_min = sample_stats.min_[0]
             self.sample_max = sample_stats.max_[0]
@@ -106,7 +123,7 @@ class Feature(object):
             pass
 
     def ix(self, key: Any, replace_strategy: ReplaceStrategy = None):
-        '''
+        """
         Main indexing method. Indexing a `Feature` using square brackets maps directly to this
         method, except there is no option to set replace stratrgy for the output.
 
@@ -116,18 +133,15 @@ class Feature(object):
             Indexing key (which can be an *everything* slice ":")
         replace_strategy : ReplaceStrategy
             Strategy used to replace missing values (i.e. NaN or None) during sampling
-        '''
+        """
         values = take_any(self.values, key)
 
         # As long as it's not a one-hot encoded or image column, we can replace null values
-        not_replaceable_kind = (
-            DataType.ONEHOT, DataType.HIGH_DIMENSIOAL, DataType.IMAGE_PATH)
+        not_replaceable_kind = (DataType.ONEHOT, DataType.HIGH_DIMENSIOAL, DataType.IMAGE_PATH)
         if replace_strategy is not None and self.kind not in not_replaceable_kind:
             is_single = not isinstance(values, ARRAY_LIKE)
             nulls = is_null([values] if is_single else values)
-            replace_value = {
-                ReplaceStrategy.MEAN: self.sample_mean
-            }.get(replace_strategy)
+            replace_value = {ReplaceStrategy.MEAN: self.sample_mean}.get(replace_strategy)
 
             # Early exit: single value needs replacing
             if is_single and nulls[0] is True:

@@ -1,4 +1,4 @@
-''' Test Preprocessing Module '''
+""" Test Preprocessing Module """
 
 from bananas.sampledata.local import load_bike, load_boston, load_california, load_titanic
 
@@ -9,7 +9,6 @@ from .test_profiling import ProfilingTestCase, main
 
 # pylint: disable=missing-docstring
 class TestUtils(ProfilingTestCase):
-
     def test_preprocess_datasets(self):
         trials = 10
         for dataset_loader in [load_bike, load_boston, load_california, load_titanic]:
@@ -17,7 +16,8 @@ class TestUtils(ProfilingTestCase):
             for _ in range(trials):
                 dataset, _ = dataset_loader(random_seed=0)
                 preprocessor = StandardPreprocessor(
-                    categorical=dataset.categorical, continuous=dataset.continuous)
+                    categorical=dataset.categorical, continuous=dataset.continuous
+                )
                 X, y = dataset.input_fn()
                 X_list.append(X)
                 y_list.append(y)

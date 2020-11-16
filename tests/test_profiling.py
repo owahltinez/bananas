@@ -1,4 +1,4 @@
-''' Test Hyper Parameters Module '''
+""" Test Hyper Parameters Module """
 
 import sys
 import cProfile
@@ -12,7 +12,6 @@ from bananas.utils.misc import warn_with_traceback
 
 # pylint: disable=missing-docstring
 class ProfilingTestCase(TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.showwarning = warnings.showwarning
@@ -25,9 +24,10 @@ class ProfilingTestCase(TestCase):
         warnings.showwarning = cls.showwarning
         stats = Stats(cls.profiler)
         stats.strip_dirs()
-        stats.sort_stats('cumtime')
+        stats.sort_stats("cumtime")
         stats.print_stats(20)
 
+
 def main():
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         sys.exit(main_())
