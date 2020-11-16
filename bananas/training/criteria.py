@@ -1,6 +1,8 @@
 from enum import Enum
 from ..training.train_step import TrainStep
 
+_WARMUP_STEP_COUNT = 1000
+
 
 def crit_target_score(step: TrainStep):
     """ If current score exceeds target score """
@@ -10,17 +12,18 @@ def crit_target_score(step: TrainStep):
 def crit_worse_score(step: TrainStep):
     """ If score has gotten significantly worse than best """
     # TODO: handle negative score case
-    return step.iteration > 500 and step.best_score * 0.8 > step.score.running_score
+    return step.iteration > _WARMUP_STEP_COUNT and step.best_score * 0.8 > step.score.running_score
 
 
 def crit_improve_score(step: TrainStep):
-    """ If score has not reached new best in 500 steps """
-    return step.iteration - step.best_iteration > 500
+    """ If score has not reached new best in minimum step count """
+    return step.iteration - step.best_iteration > _WARMUP_STEP_COUNT
+
 
 
 def crit_negative_score(step: TrainStep):
-    """ If score is negative after warmup """
-    return step.iteration > 500 and step.best_score <= 0.0
+    """ If score is negative after warmup step count """
+    return step.iteration > _WARMUP_STEP_COUNT and step.best_score <= 0.0
 
 
 class HaltCriteria(Enum):

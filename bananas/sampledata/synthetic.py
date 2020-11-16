@@ -90,12 +90,13 @@ def new_wave(samples: int = 1024, random_seed: int = None, noise_scale: float = 
     return DataSet.from_ndarray(numpy.asarray([X]), y, random_seed=random_seed, name="wave")
 
 
-def new_mat9(
+def new_3x3(
     samples: int = 1024, random_seed: int = None, k: int = 27, noise_scale: float = 0.2
 ) -> DataSet:
     """ Fuzzy 3x3 matrix of dots in a 27x27 grid """
     rng = RandomState(random_seed)
-    X = numpy.zeros((samples, k, k))
+    Y = numpy.zeros((samples, 2), dtype=numpy.uint8)
+    X = numpy.zeros((samples, k, k), dtype=float)
     r = (rng.rand(samples, k, k)) * noise_scale  # noise
     a = numpy.linspace(0, 0.5, math.ceil(k / 6)).tolist()
     b = numpy.linspace(0.5, 0, math.floor(k / 6)).tolist()
@@ -104,6 +105,8 @@ def new_mat9(
     y = rng.randint(0, 9, samples)
     for i, y_ in enumerate(y):
         xi, yi = y_ // 3, y_ % 3
-        i1, i2 = int(k * (y_ // 3) / 3), int(k * (y_ % 3) / 3)
+        Y[i, 0] = xi
+        Y[i, 1] = yi
+        i1, i2 = int(k * xi / 3), int(k * yi / 3)
         X[i, i1 : i1 + q.shape[0], i2 : i2 + q.shape[1]] += q
-    return DataSet.from_ndarray(numpy.asarray([X + r]), y + 1, random_seed=random_seed, name="mat9")
+    return DataSet.from_ndarray(numpy.asarray([X + r]), Y, random_seed=random_seed, name="3x3")

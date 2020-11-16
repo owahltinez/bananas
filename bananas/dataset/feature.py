@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Iterable
 from ..sampling.strategy import SamplingStrategy, ReplaceStrategy
 from ..utils.arrays import (
     argwhere,
@@ -30,7 +30,7 @@ class Feature(object):
         replace_strategy: ReplaceStrategy = ReplaceStrategy.MEAN,
         sample_size: int = SAMPLE_SIZE_SMALL,
         sampling_method: SamplingStrategy = None,
-        **sampling_kwargs
+        **sampling_kwargs,
     ):
         """
         Parameters
@@ -48,10 +48,9 @@ class Feature(object):
         sampling_kwargs : dict
             Arguments passed to the sampling constructor
         """
-        # assert isinstance(values, ARRAY_LIKE), \
         assert hasattr(
             values, "__getitem__"
-        ), "Parameter `values` must be array-like, found %r" % type(values)
+        ), f"Parameter `values` must be array-like, found {type(values)}"
 
         # Save internal variables
         self.name = name
@@ -134,7 +133,7 @@ class Feature(object):
         replace_strategy : ReplaceStrategy
             Strategy used to replace missing values (i.e. NaN or None) during sampling
         """
-        values = take_any(self.values, key)
+        values: Iterable = take_any(self.values, key)
 
         # As long as it's not a one-hot encoded or image column, we can replace null values
         not_replaceable_kind = (DataType.ONEHOT, DataType.HIGH_DIMENSIOAL, DataType.IMAGE_PATH)

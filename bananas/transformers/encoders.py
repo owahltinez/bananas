@@ -1,11 +1,11 @@
 """ Adaptation of multiple transformers to handle N-dimensional data instead of only 2D """
 
 import warnings
-from typing import Iterable, Set
+from typing import Dict, Iterable, Set, Union
 
 import numpy
 from ..changemap.changemap import ChangeMap
-from ..utils.arrays import ARRAY_LIKE, check_array, difference, transpose_array, equal_nested
+from ..utils.arrays import check_array, difference, transpose_array, equal_nested
 from ..utils.constants import DTYPE_UINT8
 from .base import ColumnHandlingTransformer
 
@@ -36,7 +36,7 @@ class LabelEncoder(ColumnHandlingTransformer):
     ```
     """
 
-    def __init__(self, columns: (dict, Set[int]) = None, verbose: bool = False):
+    def __init__(self, columns: Union[Dict, Set[int]] = None, verbose: bool = False):
         """
         Parameters
         ----------
@@ -166,7 +166,7 @@ class OneHotEncoder(LabelEncoder):
     (watermelon) is never encountered.
     """
 
-    def __init__(self, columns: (dict, Iterable[int]) = None, verbose: bool = False):
+    def __init__(self, columns: Union[Dict, Iterable[int]] = None, verbose: bool = False):
         """
         If classes are not known before hand, a dict of {column: [None, None, None...]} can be
         passed as placeholders.

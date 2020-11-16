@@ -1,6 +1,6 @@
 """ Collection of Data Scaling Transformers """
 
-from typing import Iterable, Tuple
+from typing import Dict, Iterable, Tuple, Union
 from ..changemap.changemap import ChangeMap
 from .running_stats import RunningStats
 
@@ -26,7 +26,7 @@ class MinMaxScaler(RunningStats):
 
     def __init__(
         self,
-        columns: (dict, Iterable[int]) = None,
+        columns: Union[Dict, Iterable[int]] = None,
         output_range: Tuple[int, int] = None,
         verbose: bool = False,
     ):
@@ -98,7 +98,7 @@ class StandardScaler(RunningStats):
     ```
     """
 
-    def __init__(self, columns: (dict, Iterable[int]) = None, verbose: bool = False):
+    def __init__(self, columns: Union[Dict, Iterable[int]] = None, verbose: bool = False):
         """
         Parameters
         ----------

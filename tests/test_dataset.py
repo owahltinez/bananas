@@ -59,6 +59,11 @@ class TestUtils(ProfilingTestCase):
         self.assertEqual(DataType.CONTINUOUS, DataType.parse(continuous))
         self.assertEqual(DataType.CONTINUOUS, DataType.parse(continuous.reshape(-1, 1)))
 
+        vector = generate_array_ints().reshape(-1, 2)
+        self.assertEqual(DataType.VECTOR, DataType.parse(vector))
+        self.assertEqual(DataType.VECTOR, DataType.parse(vector.astype(numpy.uint8)))
+        self.assertEqual(DataType.VECTOR, DataType.parse(vector.astype(numpy.float64)))
+
         unknown = generate_array_nones()
         self.assertEqual(DataType.UNKNOWN, DataType.parse(unknown))
         self.assertEqual(DataType.UNKNOWN, DataType.parse(unknown.reshape(-1, 1)))

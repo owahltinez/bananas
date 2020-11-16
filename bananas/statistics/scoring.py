@@ -6,12 +6,14 @@ more efficient way.
 
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Callable, List, Tuple
+from typing import Callable, Iterable, Tuple
 from statistics import variance
 from .basic import almost_zero, mean
-from ..utils.arrays import argmax, equal_nested, check_equal_shape
+from ..utils.arrays import argmax, equal_nested, check_equal_shape, shape_of_array
 
-ScoringFunctionImpl = Callable[[List, List], float]
+import numpy
+
+ScoringFunctionImpl = Callable[[Iterable, Iterable], float]
 
 
 @dataclass
@@ -60,7 +62,7 @@ class ScoringFunction(IntEnum):
         raise NotImplementedError("This method should be overridden")
 
 
-def score_r2(y_true: List[float], y_pred: List[float]) -> float:
+def score_r2(y_true: Iterable, y_pred: Iterable) -> float:
     """
     Coefficient of determination score, should range between 0 and 1 in most cases but can also
     output negative values.
@@ -73,13 +75,26 @@ def score_r2(y_true: List[float], y_pred: List[float]) -> float:
         TODO
     """
     check_equal_shape(y_true, y_pred)
+    shape = shape_of_array(y_true)
 
-    # Convert both arrays to floating type to prevent overflows, rounding errors, etc.
-    y_true = list(map(float, y_true))
-    y_pred = list(map(float, y_pred))
+    # For the univariate case, we can take some shortcuts
+    if len(shape) == 1:
 
-    sse = sum([(y1 - y2) ** 2 for y1, y2 in zip(y_true, y_pred)])
-    tse = (len(y_true) - 1) * variance(y_true)
+        # Convert both arrays to floating type to prevent overflows, rounding errors, etc.
+        y_true = list(map(float, y_true))
+        y_pred = list(map(float, y_pred))
+
+        sse = sum([(y1 - y2) ** 2 for y1, y2 in zip(y_true, y_pred)])
+        tse = (len(y_true) - 1) * variance(y_true)
+
+    else:
+
+        y_true = numpy.array(y_true, dtype=float)
+        y_pred = numpy.array(y_pred, dtype=float)
+
+        y_true_mean = numpy.mean(y_true, axis=0)
+        sse = numpy.square(numpy.linalg.norm(y_true - y_pred, axis=0)).sum()
+        tse = numpy.square(numpy.linalg.norm(y_true - y_true_mean, axis=0)).sum()
 
     # Numerical stability for very small denominator
     if almost_zero(tse):
@@ -88,7 +103,7 @@ def score_r2(y_true: List[float], y_pred: List[float]) -> float:
     return 1 - (sse / tse)
 
 
-def score_accuracy(y_true: List[int], y_prob: List[List[float]]) -> float:
+def score_accuracy(y_true: Iterable[int], y_prob: Iterable[Iterable[float]]) -> float:
     """
     Computes accuracy of labels in predicted set compared to the ground truth.
 
@@ -104,7 +119,9 @@ def score_accuracy(y_true: List[int], y_prob: List[List[float]]) -> float:
     return sum(equal_nested(y_true, y_pred)) / len(y_true)
 
 
-def _compute_tfpn_counts(y_true: List[float], y_prob: List[float], threshold: float = 0.5) -> TFPN:
+def _compute_tfpn_counts(
+    y_true: Iterable[float], y_prob: Iterable[float], threshold: float = 0.5
+) -> TFPN:
     """
     Computes the counts of true and false positive and negative predictions.
     """
@@ -152,7 +169,7 @@ def _compute_tfpn_counts(y_true: List[float], y_prob: List[float], threshold: fl
 
 
 def score_precision_binary(
-    y_true: List[float], y_prob: List[float], threshold: float = 0.5, counts: TFPN = None
+    y_true: Iterable[float], y_prob: Iterable[float], threshold: float = 0.5, counts: TFPN = None
 ) -> float:
     """
     Computes the precision of a set of predictions compared to the ground truth.
@@ -162,7 +179,7 @@ def score_precision_binary(
 
 
 def score_recall_binary(
-    y_true: List[int], y_prob: List[float], threshold: float = 0.5, counts: TFPN = None
+    y_true: Iterable[int], y_prob: Iterable[float], threshold: float = 0.5, counts: TFPN = None
 ) -> float:
     """
     Computes the recall of a set of predictions compared to the ground truth.
@@ -171,7 +188,9 @@ def score_recall_binary(
     return counts.true_positives / max(1, counts.true_positives + counts.false_negatives)
 
 
-def score_f1_binary(y_true: List[int], y_prob: List[float], threshold: float = 0.5) -> float:
+def score_f1_binary(
+    y_true: Iterable[int], y_prob: Iterable[float], threshold: float = 0.5
+) -> float:
     """
     Computes the F1 score of a set of predictions compared to the ground truth.
     """
@@ -182,8 +201,8 @@ def score_f1_binary(y_true: List[int], y_prob: List[float], threshold: float = 0
 
 
 def roc_curve_binary(
-    y_true: List[float], y_prob: List[float], bin_count: int = 100
-) -> Tuple[List[float], List[float]]:
+    y_true: Iterable[float], y_prob: Iterable[float], bin_count: int = 100
+) -> Tuple[Iterable[float], Iterable[float]]:
     """
     Computes the Receiver Operating Characteristic curve.
 
@@ -225,7 +244,7 @@ def roc_curve_binary(
     return tpr, fpr
 
 
-def _one_vs_all(y_true: List[int], y_prob: List[List[float]]):
+def _one_vs_all(y_true: Iterable[int], y_prob: Iterable[Iterable[float]]):
 
     # Get the number of classes
     num_samples = len(y_true)
@@ -241,7 +260,9 @@ def _one_vs_all(y_true: List[int], y_prob: List[List[float]]):
         yield y_true_binary, y_prob_binary
 
 
-def score_precision(y_true: List[int], y_prob: List[List[float]], threshold: float = 0.5) -> float:
+def score_precision(
+    y_true: Iterable[int], y_prob: Iterable[Iterable[float]], threshold: float = 0.5
+) -> float:
     """
     Computes the precision of a set of predictions compared to the ground truth.
     """
@@ -253,7 +274,9 @@ def score_precision(y_true: List[int], y_prob: List[List[float]], threshold: flo
     )
 
 
-def score_recall(y_true: List[int], y_prob: List[List[float]], threshold: float = 0.5) -> float:
+def score_recall(
+    y_true: Iterable[int], y_prob: Iterable[Iterable[float]], threshold: float = 0.5
+) -> float:
     """
     Computes the recall of a set of predictions compared to the ground truth.
     """
@@ -265,7 +288,9 @@ def score_recall(y_true: List[int], y_prob: List[List[float]], threshold: float 
     )
 
 
-def score_f1(y_true: List[int], y_prob: List[List[float]], threshold: float = 0.5) -> float:
+def score_f1(
+    y_true: Iterable[int], y_prob: Iterable[Iterable[float]], threshold: float = 0.5
+) -> float:
     """
     Computes the F1 score of a set of predictions compared to the ground truth.
     """
@@ -277,7 +302,9 @@ def score_f1(y_true: List[int], y_prob: List[List[float]], threshold: float = 0.
     )
 
 
-def roc_curve_multiclass(y_true: List[int], y_prob: List[List[float]], bin_count: int = 100):
+def roc_curve_multiclass(
+    y_true: Iterable[int], y_prob: Iterable[Iterable[float]], bin_count: int = 100
+):
 
     # Binarize the probabilities by applying one-vs-all with respect to each of the labels
     tprs, fprs = [], []
@@ -292,7 +319,7 @@ def roc_curve_multiclass(y_true: List[int], y_prob: List[List[float]], bin_count
     return [mean(samples) for samples in zip(*tprs)], [mean(samples) for samples in zip(*fprs)]
 
 
-def score_auroc(y_true: List[int], y_prob: List[List[float]]) -> float:
+def score_auroc(y_true: Iterable[int], y_prob: Iterable[Iterable[float]]) -> float:
     """
     Computes the Area Under ROC curve (AUROC).
 

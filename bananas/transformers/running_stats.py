@@ -1,6 +1,6 @@
 """ Threshold-based transformers """
 
-from typing import Iterable
+from typing import Dict, Iterable, Union
 from ..changemap.changemap import ChangeMap
 from ..utils.arrays import flatten, shape_of_array
 from .base import ColumnHandlingTransformer
@@ -24,11 +24,11 @@ class RunningStats(ColumnHandlingTransformer):
     ```
     """
 
-    def __init__(self, columns: (dict, Iterable[int]) = None, verbose: bool = False, **kwargs):
+    def __init__(self, columns: Union[Dict, Iterable[int]] = None, verbose: bool = False, **kwargs):
         """
         Parameters
         ----------
-        columns : dict, Iterable[int]
+        columns : Union[Dict, Iterable[int]]
             TODO
         verbose : bool
             TODO

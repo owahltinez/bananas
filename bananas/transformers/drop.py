@@ -1,8 +1,7 @@
 """ Threshold-based transformers """
 
-from typing import Iterable
+from typing import Dict, Iterable, Union
 from ..changemap.changemap import ChangeMap
-from ..utils.arrays import ARRAY_LIKE
 from ..testing.dummy import DummyTransformer
 
 
@@ -13,11 +12,11 @@ class FeatureDrop(DummyTransformer):
     becomes very useful during exploratory phases and when used in conjunction with other transformers.
     """
 
-    def __init__(self, columns: (dict, Iterable[int]) = None, verbose: bool = False):
+    def __init__(self, columns: Union[Dict, Iterable] = None, verbose: bool = False):
         """
         Parameters
         ----------
-        columns : dict, Iterable
+        columns : Union[Dict, Iterable]
             TODO
         verbose : bool
             TODO

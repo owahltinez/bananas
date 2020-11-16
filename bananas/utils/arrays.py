@@ -301,7 +301,7 @@ def take_axis(arr: Iterable, axis: tuple):
         return take_any(ax, axis[1])
 
 
-def take_any(arr: Iterable, key):
+def take_any(arr: Iterable, key: Any):
     """
     Catch-all method to take elements from an array. The behavior will depend on the type of [key].
     """

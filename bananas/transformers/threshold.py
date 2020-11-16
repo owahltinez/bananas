@@ -1,6 +1,6 @@
 """ Threshold-based transformers """
 
-from typing import Iterable
+from typing import Dict, Iterable, Union
 from ..changemap.changemap import ChangeMap
 from .running_stats import RunningStats
 
@@ -38,7 +38,10 @@ class VarianceThreshold(RunningStats):
     """
 
     def __init__(
-        self, columns: (dict, Iterable[int]) = None, threshold: float = 1e-2, verbose: bool = False
+        self,
+        columns: Union[Dict, Iterable[int]] = None,
+        threshold: float = 1e-2,
+        verbose: bool = False,
     ):
         """
         Parameters

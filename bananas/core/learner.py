@@ -4,7 +4,7 @@ from ..changemap.mixins import InputChangeMixin
 from ..changemap.changemap import ChangeMap
 from ..hyperparameters.mixins import HyperParametersMixin
 from ..training.mixins import TrainableMixin
-from ..utils.arrays import check_array, shape_of_features
+from ..utils.arrays import check_array, shape_of_array, shape_of_features
 from ..utils.constants import ARRAY_LIKE
 
 _ATTR_NAMED_ARGUMENTS_PREFIX = "_named_argument"
@@ -34,7 +34,7 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
         # Declare variables initialized during fitting to aid type-checking
         self.input_dtype_: tuple = None
         self.input_shape_: tuple = None
-        self.output_shape_: tuple = (1,)
+        self.output_shape_: tuple = None
         self.input_is_vector_: bool = None
 
     def print(self, *msg, **kwargs):
@@ -198,7 +198,7 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
             mixin.__init__(self)
         return self
 
-    def predict(self, X: Iterable[Iterable]):  # pylint: disable=unused-argument
+    def predict(self, X: Iterable[Iterable]) -> Iterable:  # pylint: disable=unused-argument
         """
         Outputs the learner's predicted target values for the provided input samples. **Input
         samples are  expected to be a list of columns**, so that each column represents a distinct
