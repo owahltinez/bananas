@@ -10,7 +10,7 @@ from ..utils.arrays import (
     unique,
     value_counts,
 )
-from ..utils.constants import ARRAY_LIKE, SAMPLE_SIZE_SMALL
+from ..utils.constants import ARRAY_LIKE, SAMPLE_SIZE_SMALL, TYPE_ARRAY
 from ..utils.images import open_image
 from .datatype import DataType
 
@@ -24,7 +24,7 @@ class Feature(object):
 
     def __init__(
         self,
-        values: ARRAY_LIKE,
+        values: TYPE_ARRAY,
         kind: DataType = None,
         name: str = None,
         replace_strategy: ReplaceStrategy = ReplaceStrategy.MEAN,
@@ -35,7 +35,7 @@ class Feature(object):
         """
         Parameters
         ----------
-        values : ARRAY_LIKE
+        values : TYPE_ARRAY
             Values that comprise this feature
         kind : DataType
             Type of data, if known -- otherwise it will be inferred at runtime

@@ -11,7 +11,6 @@ from ..statistics.random import RandomState
 from ..statistics.scoring import ScoringFunction
 from ..transformers.base import ColumnHandlingTransformer
 from ..utils.constants import ARRAY_LIKE, DTYPE_FLOAT
-from ..utils.arrays import shape_of_array
 
 
 class DummyClassifier(BaseClassifier):

@@ -9,7 +9,7 @@ import numpy
 
 # Relative imports
 from ..utils.arrays import unique
-from ..utils.constants import DTYPE_BOOL, DTYPE_FLOAT, DTYPE_INT, DTYPE_UINT8, DTYPE_STR
+from ..utils.constants import DTYPE_BOOL, DTYPE_FLOAT, DTYPE_INT, DTYPE_UINT8, DTYPE_STR, TYPE_ARRAY
 
 
 class DataType(IntEnum):
@@ -25,13 +25,13 @@ class DataType(IntEnum):
     VECTOR = 6
 
     @staticmethod
-    def is_categorical(data: Union[numpy.ndarray, "DataType"]) -> bool:
+    def is_categorical(data: Union[TYPE_ARRAY, "DataType"]) -> bool:
         """
         Determines whether a specific piece of data or DataType is categorical or a subset thereof
 
         Parameters
         ----------
-        data : (numpy.array, DataType)
+        data : Union[ARRAY_LIKE, "DataType"]
             Numpy array or DataType to analyze
 
         Returns

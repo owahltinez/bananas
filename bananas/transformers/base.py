@@ -2,7 +2,6 @@ import sys
 from typing import Dict, Iterable, Set, Union
 from ..changemap.changemap import ChangeMap
 from ..core.learner import UnsupervisedLearner
-from ..utils.arrays import ARRAY_LIKE
 
 
 class BaseTransformer(UnsupervisedLearner):

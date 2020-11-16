@@ -5,7 +5,7 @@ implementation of the function. Implemented functions include `mean`, `median` a
 """
 
 import statistics
-from ..utils.constants import ARRAY_LIKE
+from ..utils.constants import TYPE_ARRAY
 from ..utils import __NUMPY_AVAILABLE__
 
 if __NUMPY_AVAILABLE__:
@@ -17,14 +17,14 @@ def almost_zero(x, atol: float = 1e-6):
     return abs(x) < atol
 
 
-def mean(arr: ARRAY_LIKE):
+def mean(arr: TYPE_ARRAY):
     """
     Compute the mean of the array using `numpy` if available, else fallback to `statistics` module.
     """
     return numpy.mean(arr) if __NUMPY_AVAILABLE__ else statistics.mean(arr)
 
 
-def median(arr: ARRAY_LIKE):
+def median(arr: TYPE_ARRAY):
     """
     Compute the median of the array using `numpy` if available, else fallback to `statistics`
     module.
@@ -32,7 +32,7 @@ def median(arr: ARRAY_LIKE):
     return numpy.median(arr) if __NUMPY_AVAILABLE__ else statistics.median(arr)
 
 
-def variance(arr: ARRAY_LIKE):
+def variance(arr: TYPE_ARRAY):
     """
     Compute the variance of the array using `numpy` if available, else fallback to `statistics`
     module.

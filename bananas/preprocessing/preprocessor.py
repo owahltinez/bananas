@@ -1,8 +1,7 @@
-from typing import Any, Dict, Iterable, Tuple, Union
-from ..core.learner import Learner
+from typing import Any, Dict, Iterable, Union
 from ..core.pipeline import Pipeline, PipelineStep
 from ..testing.dummy import DummyTransformer
-from ..utils.arrays import ARRAY_LIKE
+from ..utils.constants import ARRAY_LIKE, TYPE_ARRAY
 
 
 class _Preprocessor(Pipeline):
@@ -13,18 +12,18 @@ class _Preprocessor(Pipeline):
 
     def __init__(
         self,
-        categorical: Union[Dict, ARRAY_LIKE] = None,
-        continuous: Union[Dict, ARRAY_LIKE] = None,
+        categorical: Union[Dict, TYPE_ARRAY] = None,
+        continuous: Union[Dict, TYPE_ARRAY] = None,
         verbose: bool = False,
         **kwargs
     ):
         """
         Parameters
         ----------
-        categorical : Union[Dict, ARRAY_LIKE]
+        categorical : Union[Dict, TYPE_ARRAY]
             Columns that contain categorical data. If a dict is given, values must contain
             categories for that column.
-        continuous : Union[Dict, ARRAY_LIKE]
+        continuous : Union[Dict, TYPE_ARRAY]
             Columns that contain continuous data. If a dict is passed, its values are ignored.
         verbose : Boolean
             Prints debug info

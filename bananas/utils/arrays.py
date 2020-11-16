@@ -152,7 +152,7 @@ def check_equal_shape(arr1: Iterable, arr2: Iterable):
     )
 
 
-def equal_nested(a: Iterable, b: Iterable, atol: float = 1e-6) -> [bool]:
+def equal_nested(a: Iterable, b: Iterable, atol: float = 1e-6) -> List[bool]:
     """ Returns true if both arrays, which can be nested, are equal up to `atol` tolerance. """
     if all([isinstance(x, ARRAY_LIKE) for x in (a, b)]):
         if len(a) != len(b):
