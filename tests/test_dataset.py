@@ -1,14 +1,23 @@
-''' Test Utils Module '''
+""" Test Utils Module """
 
 import os
 import numpy
 from pathlib import Path
 
 from bananas.dataset import DataType, Feature, DataSet
-from bananas.testing.generators import \
-    generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
-    generate_array_int_floats, generate_array_uints, generate_array_nones, generate_array_strings, \
-    generate_images, generate_onehot_matrix, generate_array_infinities
+from bananas.testing.generators import (
+    generate_array_booleans,
+    generate_array_chars,
+    generate_array_floats,
+    generate_array_ints,
+    generate_array_int_floats,
+    generate_array_uints,
+    generate_array_nones,
+    generate_array_strings,
+    generate_images,
+    generate_onehot_matrix,
+    generate_array_infinities,
+)
 from bananas.utils.constants import SAMPLE_SIZE_SMALL
 
 from .test_profiling import ProfilingTestCase, main
@@ -16,7 +25,6 @@ from .test_profiling import ProfilingTestCase, main
 
 # pylint: disable=missing-docstring
 class TestUtils(ProfilingTestCase):
-
     def test_check_feature_types(self):
         onehot = generate_onehot_matrix()
         self.assertEqual(DataType.ONEHOT, DataType.parse(onehot))
@@ -92,9 +100,11 @@ class TestUtils(ProfilingTestCase):
     def test_feature_custom_loader(self):
         num = 1024
         data = generate_array_floats(n=num)
+
         class MyCustomDataLoader(object):
             def __len__(self):
                 return len(data)
+
             def __getitem__(self, idx):
                 return data[idx]
 
@@ -105,16 +115,16 @@ class TestUtils(ProfilingTestCase):
 
     def test_dataset_init(self):
         num = SAMPLE_SIZE_SMALL
-        feat1 = Feature(generate_array_floats(n=num), name='feat1')
-        feat2 = Feature(generate_array_floats(n=num), name='feat2')
+        feat1 = Feature(generate_array_floats(n=num), name="feat1")
+        feat2 = Feature(generate_array_floats(n=num), name="feat2")
         dataset = DataSet([feat1, feat2])
 
         self.assertEqual(num, dataset.count)
         self.assertEqual(num, dataset.count)
-        self.assertTrue(numpy.array_equal(feat1.values, dataset.features['feat1'].values))
-        self.assertTrue(numpy.array_equal(feat2.values, dataset.features['feat2'].values))
-        self.assertTrue(numpy.array_equal(dataset['feat1', :num], feat1[:num]))
-        self.assertTrue(numpy.array_equal(dataset['feat2', :num], feat2[:num]))
+        self.assertTrue(numpy.array_equal(feat1.values, dataset.features["feat1"].values))
+        self.assertTrue(numpy.array_equal(feat2.values, dataset.features["feat2"].values))
+        self.assertTrue(numpy.array_equal(dataset["feat1", :num], feat1[:num]))
+        self.assertTrue(numpy.array_equal(dataset["feat2", :num], feat2[:num]))
 
     def test_dataset_sampling(self):
         num = SAMPLE_SIZE_SMALL
@@ -135,29 +145,29 @@ class TestUtils(ProfilingTestCase):
 
     def test_dataset_feature_names(self):
         num = SAMPLE_SIZE_SMALL
-        feat1 = Feature(generate_array_floats(n=num), name='a')
-        feat2 = Feature(generate_array_floats(n=num), name='b')
+        feat1 = Feature(generate_array_floats(n=num), name="a")
+        feat2 = Feature(generate_array_floats(n=num), name="b")
         dataset = DataSet([feat1, feat2])
 
         self.assertEqual(num, dataset.count)
         self.assertEqual(num, dataset.count)
-        self.assertTrue(numpy.array_equal(feat1.values, dataset.features['a'].values))
-        self.assertTrue(numpy.array_equal(feat2.values, dataset.features['b'].values))
-        self.assertTrue(numpy.array_equal(dataset['a', :num], feat1[:num]))
-        self.assertTrue(numpy.array_equal(dataset['b', :num], feat2[:num]))
+        self.assertTrue(numpy.array_equal(feat1.values, dataset.features["a"].values))
+        self.assertTrue(numpy.array_equal(feat2.values, dataset.features["b"].values))
+        self.assertTrue(numpy.array_equal(dataset["a", :num], feat1[:num]))
+        self.assertTrue(numpy.array_equal(dataset["b", :num], feat2[:num]))
 
     def test_dataset_different_shapes(self):
         num = SAMPLE_SIZE_SMALL
-        feat1 = Feature(generate_array_floats(n=num), name='feat1')
-        feat2 = Feature(generate_onehot_matrix(n=num), name='feat2')
+        feat1 = Feature(generate_array_floats(n=num), name="feat1")
+        feat2 = Feature(generate_onehot_matrix(n=num), name="feat2")
         dataset = DataSet([feat1, feat2])
 
         self.assertEqual(num, dataset.count)
         self.assertEqual(num, dataset.count)
-        self.assertTrue(numpy.array_equal(feat1.values, dataset.features['feat1'].values))
-        self.assertTrue(numpy.array_equal(feat2.values, dataset.features['feat2'].values))
-        self.assertTrue(numpy.array_equal(dataset['feat1', :num], feat1[:num]))
-        self.assertTrue(numpy.array_equal(dataset['feat2', :num], feat2[:num]))
+        self.assertTrue(numpy.array_equal(feat1.values, dataset.features["feat1"].values))
+        self.assertTrue(numpy.array_equal(feat2.values, dataset.features["feat2"].values))
+        self.assertTrue(numpy.array_equal(dataset["feat1", :num], feat1[:num]))
+        self.assertTrue(numpy.array_equal(dataset["feat2", :num], feat2[:num]))
 
         arr1 = dataset[:, :num]
         arr2 = [feat.values[:num] for feat in (feat1, feat2)]
@@ -173,10 +183,11 @@ class TestUtils(ProfilingTestCase):
     def test_dataset_load_csv(self):
         cwd = os.path.dirname(os.path.realpath(__file__))
         dataset = DataSet.from_csv(
-            Path(cwd) / '..' / 'bananas' / 'sampledata' / 'dummy' / 'train.csv', random_seed=0)
+            Path(cwd) / ".." / "bananas" / "sampledata" / "dummy" / "train.csv", random_seed=0
+        )
         sampleX, sampleY = dataset.input_fn(batch_size=10)
         self.assertListEqual(sampleX, [[1] * 10] * 3)
-        self.assertListEqual(sampleY, ['a'] * 10)
+        self.assertListEqual(sampleY, ["a"] * 10)
 
     def test_dataset_custom_loader(self):
         num = SAMPLE_SIZE_SMALL
@@ -185,6 +196,7 @@ class TestUtils(ProfilingTestCase):
         class MyCustomDataLoader(object):
             def __len__(self):
                 return len(arr)
+
             def __getitem__(self, idx):
                 return arr[idx]
 
@@ -193,5 +205,6 @@ class TestUtils(ProfilingTestCase):
         self.assertTrue(numpy.array_equal(dataset1.input_fn(), dataset2.input_fn()))
 
     # TODO: test with target, test input_fn()
+
 
 main()

@@ -4,7 +4,7 @@ from .changemap import ChangeMap
 
 
 class InputChangeMixin(object):
-    '''
+    """
     Mixin class that adds relevant methods to a learner to handle shape changing with a `ChangeMap`.
 
     `InputChangeMixin` lets inheriting classes emit and handle
@@ -19,19 +19,20 @@ class InputChangeMixin(object):
     some of the previous work. For example, a neural network may reset all of its weights so it can
     begin learning the data anew, rather than throwing an error. In a situation like that, raising a
     warning would be more appropriate.
-    '''
+    """
+
     def on_input_shape_changed(self, change_map: ChangeMap):
-        ''' Notify this learner that the input shape has changed '''
-        raise UnexpectedShapeError('Input shape changed. %r' % change_map)
+        """ Notify this learner that the input shape has changed """
+        raise UnexpectedShapeError("Input shape changed. %r" % change_map)
 
     def on_output_shape_changed(self, change_map: ChangeMap):
-        ''' Notify all callbacks attached to this learner that the output shape has changed '''
-        for callback in getattr(self, 'output_shape_changed_callbacks_', []):
+        """ Notify all callbacks attached to this learner that the output shape has changed """
+        for callback in getattr(self, "output_shape_changed_callbacks_", []):
             callback(change_map)
 
     def add_output_shape_changed_callback(self, callback: Callable[[ChangeMap], None]):
-        ''' Attach a new callback to be notified when the output shape of this learner changes '''
-        if not hasattr(self, 'output_shape_changed_callbacks_'):
+        """ Attach a new callback to be notified when the output shape of this learner changes """
+        if not hasattr(self, "output_shape_changed_callbacks_"):
             self.output_shape_changed_callbacks_ = []
         self.output_shape_changed_callbacks_.append(callback)
 

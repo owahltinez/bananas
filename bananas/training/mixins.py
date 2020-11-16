@@ -9,8 +9,9 @@ from ..training.train_step import TrainStep
 from ..statistics.window import WindowStats
 from ..utils import tqdm_
 
+
 class TrainableMixin(object):
-    '''
+    """
     Mixin that adds a `train()` function to estimators.
 
     # Input function
@@ -28,16 +29,23 @@ class TrainableMixin(object):
     provided in the [sampling module](../sampling/index.md). To avoid loading all data into memory,
     take a look at implementing a [custom data class](../sampling/index.md#custom-data-class) that
     is compatible with the sampling classes.
-    '''
+    """
 
     # pylint: disable=too-many-arguments
-    def train(self, input_fn: callable, halt_criteria: List[HaltCriteria] = None,
-              max_steps: int = 10000, max_score: float = None, progress: bool = False,
-              callback: callable = None, **input_fn_opts):
-        '''
+    def train(
+        self,
+        input_fn: callable,
+        halt_criteria: List[HaltCriteria] = None,
+        max_steps: int = 10000,
+        max_score: float = None,
+        progress: bool = False,
+        callback: callable = None,
+        **input_fn_opts
+    ):
+        """
         Keeps drawing samples from `input_fn` and fitting them to the underlying estimator
         while scoring against test dataset.
-        '''
+        """
 
         # Process halt criteria
         if halt_criteria is None:
@@ -51,8 +59,8 @@ class TrainableMixin(object):
         # Initialize train step and history objects to keep track of iterations
         history = TrainHistory()
         step_data = TrainStep(max_steps=max_steps, max_score=max_score)
-        if getattr(self, 'verbose', False):
-            self.print('Starting training with %d max steps' % max_steps)
+        if getattr(self, "verbose", False):
+            self.print("Starting training with %d max steps" % max_steps)
 
         # Keep the last handful of scores to compute a running average
         window_scores = WindowStats(window_size=8)
@@ -86,13 +94,14 @@ class TrainableMixin(object):
 
             # Avoid breaking out of the loop, just keep calling continue until this is over
             # Used as a workaround for https://github.com/tqdm/tqdm/issues/352
-            if history.early_exit: continue
+            if history.early_exit:
+                continue
 
             # Print progress at 1, 2, 3, ..., 10, 20, 30, ..., 100, 200, 300, ..., 1000, 2000, ...
             if any([idx < (10 ** (n + 1)) and (idx + 1) % (10 ** n) == 0 for n in range(max_n)]):
-                loop_log = 'Training iteration %d/%d.' % (idx + 1, max_steps)
-                test_log = 'Current test score: %.03f.' % (step_data.running_score)
-                self.print('%s %s' % (loop_log, test_log))
+                loop_log = "Training iteration %d/%d." % (idx + 1, max_steps)
+                test_log = "Current test score: %.03f." % (step_data.running_score)
+                self.print("%s %s" % (loop_log, test_log))
 
             # Pull a sample for training and fit the estimator with it
             X_train, y_train = input_fn(**input_fn_opts)
@@ -108,7 +117,7 @@ class TrainableMixin(object):
 
             # Keep progress bar updated with latest running score
             if progress:
-                progress_bar.set_description(progress_desc + ' (%.03f)' % step_data.running_score)
+                progress_bar.set_description(progress_desc + " (%.03f)" % step_data.running_score)
                 progress_bar.update()
 
             # Update best score if appropriate
@@ -142,6 +151,7 @@ class TrainableMixin(object):
             progress_bar.close()
 
         # Update the training time and return history
-        history.time_millis = (monotonic() - train_start)
+        history.time_millis = monotonic() - train_start
         return history
+
     # pylint: enable=too-many-arguments

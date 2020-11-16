@@ -1,4 +1,4 @@
-''' Miscellaneous constant definitions; utility methods for arrays, images and more. '''
+""" Miscellaneous constant definitions; utility methods for arrays, images and more. """
 
 import warnings
 
@@ -6,12 +6,14 @@ import warnings
 __NUMPY_AVAILABLE__ = False
 try:
     import numpy
+
     __NUMPY_AVAILABLE__ = True
 except ImportError:
     pass
 
 # Import tqdm and workaround some of their issues
 import tqdm
+
 try:
     __IPYTHON__
     from tqdm.notebook import tqdm as tqdm_
@@ -20,4 +22,4 @@ except NameError:
 
 # https://github.com/tqdm/tqdm/issues/481
 tqdm_.monitor_interval = 0
-warnings.filterwarnings('ignore', category=tqdm.TqdmSynchronisationWarning)
+warnings.filterwarnings("ignore", category=tqdm.TqdmSynchronisationWarning)

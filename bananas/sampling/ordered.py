@@ -3,7 +3,7 @@ from .base import _BaseSampler
 
 
 class OrderedSampler(_BaseSampler):
-    '''
+    """
     Ordered sampling is the most basic form of sampling. It consists of simply iterating over the input
     data and returning it in batches. For example, given a dataset of [0, 1, 2, 3, ... , 99], performing
     ordered sampling using a batch size of 10 would result in the following samples:
@@ -30,11 +30,17 @@ class OrderedSampler(_BaseSampler):
     sampler = OrderedSampler(dataset, blacklist=set([2, 5, 10]))
     batch = sampler(batch_size=10)  # [0, 1, 3, 4, 6, 7, 8, 9, 11, 12]
     ```
-    '''
+    """
 
-    def __init__(self, data, batch_size: int = 128, epochs: int = None,
-                 input_size: int = None, blacklist: set = None):
-        '''
+    def __init__(
+        self,
+        data,
+        batch_size: int = 128,
+        epochs: int = None,
+        input_size: int = None,
+        blacklist: set = None,
+    ):
+        """
         Parameters
         ----------
         data
@@ -47,23 +53,24 @@ class OrderedSampler(_BaseSampler):
             TODO
         blacklist : set
             TODO
-        '''
+        """
         super().__init__(self)
 
         # Sanitize input size
-        self.input_size = input_size or (len(data) if hasattr(data, '__len__') else sys.maxsize)
-        assert self.input_size > 0, 'Input size must be greater than zero, found data: %r' % data
+        self.input_size = input_size or (len(data) if hasattr(data, "__len__") else sys.maxsize)
+        assert self.input_size > 0, "Input size must be greater than zero, found data: %r" % data
 
         # Validate that batch size is correct
         if epochs is not None and batch_size > self.input_size:
-            raise ValueError('Batch size [%d] cannot be larger than input size [%d]' %
-                             (batch_size, input_size))
+            raise ValueError(
+                "Batch size [%d] cannot be larger than input size [%d]" % (batch_size, input_size)
+            )
 
         # Compute shape of input by looking at first item
         first = data[0]
-        if hasattr(first, 'shape'):
+        if hasattr(first, "shape"):
             self.input_shape = first.shape
-        elif hasattr(first, '__len__') and not isinstance(data, str):
+        elif hasattr(first, "__len__") and not isinstance(data, str):
             self.input_shape = (len(first),)
         else:
             self.input_shape = (1,)
@@ -77,11 +84,11 @@ class OrderedSampler(_BaseSampler):
         self.blacklist = None if blacklist is None else set(blacklist)
 
     def _next_index(self):
-        ''' By default the next index is the current index which is auto-incremented '''
+        """ By default the next index is the current index which is auto-incremented """
         return self.idx_curr
 
     def indices(self, batch_size: int = None):
-        ''' Generates a batch of (features, target) samples '''
+        """ Generates a batch of (features, target) samples """
         batch_idx = []
 
         # Batch size can be overriden if passed as an argument
@@ -92,7 +99,7 @@ class OrderedSampler(_BaseSampler):
 
             # Check that we didn't go over the max epochs
             if self.epochs is not None and self.epoch_curr >= self.epochs:
-                raise IndexError('Maximum number of epochs reached: %d' % self.epochs)
+                raise IndexError("Maximum number of epochs reached: %d" % self.epochs)
 
             # Call internal function to select index
             # Subclasses are expected to override this function

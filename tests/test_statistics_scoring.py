@@ -1,4 +1,4 @@
-''' Test Stats Scoring Module '''
+""" Test Stats Scoring Module """
 
 from bananas.statistics.random import RandomState
 from bananas.statistics.scoring import ScoringFunction
@@ -7,7 +7,6 @@ from .test_profiling import ProfilingTestCase, main
 
 # pylint: disable=missing-docstring
 class TestUtils(ProfilingTestCase):
-
     def test_score_accuracy(self):
         labels_true = [0] * 100
         labels_probs = [[1, 0, 0]] * 50 + [[0, 1, 0]] * 25 + [[0, 0, 1]] * 25
@@ -90,13 +89,13 @@ class TestUtils(ProfilingTestCase):
         scoring_function = ScoringFunction.create(ScoringFunction.AREA_UNDER_ROC)
 
         score = scoring_function(labels_true[:50], labels_probs[:50])
-        self.assertGreater(score, .66)
+        self.assertGreater(score, 0.66)
 
         score = scoring_function(labels_true[:75], labels_probs[:75])
-        self.assertGreater(score, .5)
+        self.assertGreater(score, 0.5)
 
         score = scoring_function(labels_true[:100], labels_probs[:100])
-        self.assertLess(score, .5)
+        self.assertLess(score, 0.5)
 
 
 main()

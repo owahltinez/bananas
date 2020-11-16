@@ -1,7 +1,8 @@
 from enum import Enum, auto
 
+
 class NormalizationStrategy(Enum):
-    ''' Normalization strategy enum '''
+    """ Normalization strategy enum """
 
     # Automatically select based on data
     AUTO = auto()

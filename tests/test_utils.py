@@ -1,18 +1,26 @@
-''' Test Utils Module '''
+""" Test Utils Module """
 
 import numpy
 from bananas.utils.arrays import check_array, concat_arrays, shape_of_array, transpose_array
-from bananas.testing.generators import \
-    generate_array_booleans, generate_array_chars, generate_array_floats, generate_array_ints, \
-    generate_array_int_floats, generate_array_uints, generate_array_nones, generate_array_strings, \
-    generate_images, generate_onehot_matrix, generate_array_infinities
+from bananas.testing.generators import (
+    generate_array_booleans,
+    generate_array_chars,
+    generate_array_floats,
+    generate_array_ints,
+    generate_array_int_floats,
+    generate_array_uints,
+    generate_array_nones,
+    generate_array_strings,
+    generate_images,
+    generate_onehot_matrix,
+    generate_array_infinities,
+)
 
 from .test_profiling import ProfilingTestCase, main
 
 
 # pylint: disable=missing-docstring
 class TestUtils(ProfilingTestCase):
-
     def test_check_array_valid(self):
         valid_generators = [
             generate_array_booleans,
@@ -20,15 +28,14 @@ class TestUtils(ProfilingTestCase):
             generate_array_floats,
             generate_array_ints,
             generate_array_strings,
-            generate_array_uints]
+            generate_array_uints,
+        ]
         for gen in valid_generators:
             arr = gen()
             check_array(arr)
 
     def test_check_array_invalid(self):
-        invalid_generators = [
-            generate_array_infinities,
-            generate_array_nones]
+        invalid_generators = [generate_array_infinities, generate_array_nones]
         for gen in invalid_generators:
             self.assertRaises(ValueError, lambda: check_array(gen()))
 
@@ -67,7 +74,8 @@ class TestUtils(ProfilingTestCase):
 
         # 2D arrays (2 columns)
         array_list = [
-            generate_array_ints(n=sample_size * 2).reshape(-1, 2) for _ in range(array_count)]
+            generate_array_ints(n=sample_size * 2).reshape(-1, 2) for _ in range(array_count)
+        ]
         array_concat = concat_arrays(*array_list)
         self.assertEqual(shape_of_array(array_list[0])[1:], shape_of_array(array_concat)[1:])
         self.assertEqual(len(array_concat), sample_size * array_count)

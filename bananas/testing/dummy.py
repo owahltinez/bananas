@@ -1,8 +1,8 @@
-'''
+"""
 This module includes dummy implementations for a classifier, a regressor and a transformer that can
 be used as a sample implementation but is also used for testing purposes. Take a peek at the [source
 code](dummy.py) for more details.
-'''
+"""
 
 from typing import Any, List
 from ..changemap.changemap import ChangeMap
@@ -15,15 +15,19 @@ from ..utils.arrays import shape_of_array
 
 
 class DummyClassifier(BaseClassifier):
-    '''
+    """
     Dummy implementation of a classifier used for testing purposes. It can output a random value
     or the expected value based on prior data depending on the strategy selected.
-    '''
+    """
 
-    def __init__(self, strategy: str = 'random', classes: List[Any] = None,
-                 scoring_function: ScoringFunction = ScoringFunction.ACCURACY,
-                 random_seed: int = 0):
-        '''
+    def __init__(
+        self,
+        strategy: str = "random",
+        classes: List[Any] = None,
+        scoring_function: ScoringFunction = ScoringFunction.ACCURACY,
+        random_seed: int = 0,
+    ):
+        """
         Parameters
         ----------
         strategy : str
@@ -32,9 +36,13 @@ class DummyClassifier(BaseClassifier):
             TODO
         random_seed : int
             TODO
-        '''
-        super().__init__(strategy=strategy, classes=classes, scoring_function=scoring_function,
-                         random_seed=random_seed)
+        """
+        super().__init__(
+            strategy=strategy,
+            classes=classes,
+            scoring_function=scoring_function,
+            random_seed=random_seed,
+        )
 
         self.strategy = strategy
         self._rng = RandomState(random_seed)
@@ -57,41 +65,45 @@ class DummyClassifier(BaseClassifier):
         class_count = len(self.classes_)
         sample_count = len(X[0])
 
-        if self.strategy == 'mean':
+        if self.strategy == "mean":
             total = sum(self.value_counts_.values())
             return [[count / total for count in self.value_counts_.values()]] * sample_count
 
-        if self.strategy == 'random':
+        if self.strategy == "random":
             return [self._rng.rand(class_count) for _ in range(sample_count)]
 
-        raise RuntimeError('Unknown strategy: %s' % self.strategy)
-
+        raise RuntimeError("Unknown strategy: %s" % self.strategy)
 
 
 class DummyRegressor(BaseRegressor):
-    '''
+    """
     Dummy implementation of a regressor used for testing purposes. It can output a random value
     or the expected value based on prior data depending on the strategy selected.
-    '''
+    """
 
-    def __init__(self, strategy='random', scoring_function: ScoringFunction = ScoringFunction.R2,
-                 random_seed: int = 0):
-        '''
+    def __init__(
+        self,
+        strategy="random",
+        scoring_function: ScoringFunction = ScoringFunction.R2,
+        random_seed: int = 0,
+    ):
+        """
         Parameters
         ----------
         strategy : str
             TODO
         random_seed : int
             TODO
-        '''
-        super().__init__(strategy=strategy, scoring_function=scoring_function,
-                         random_seed=random_seed)
+        """
+        super().__init__(
+            strategy=strategy, scoring_function=scoring_function, random_seed=random_seed
+        )
         self.strategy = strategy
         self.rng = RandomState(random_seed)
         self.y_min_ = None
         self.y_max_ = None
-        self.y_sum_ = 0.
-        self.y_mean_ = 0.
+        self.y_sum_ = 0.0
+        self.y_mean_ = 0.0
         self.y_count_ = 0
 
     def fit(self, X, y):
@@ -114,37 +126,39 @@ class DummyRegressor(BaseRegressor):
         X = self.check_X(X)
         sample_count = len(X[0])
 
-        if self.strategy == 'random':
+        if self.strategy == "random":
             output_range = self.y_max_ - self.y_min_
             return self.y_min_ + self.rng.randn(sample_count) * output_range
 
-        if self.strategy == 'mean':
+        if self.strategy == "mean":
             return [self.y_mean_] * sample_count
 
-        raise RuntimeError('Unknown strategy: %s' % self.strategy)
+        raise RuntimeError("Unknown strategy: %s" % self.strategy)
 
 
 class DummyTransformer(ColumnHandlingTransformer):
-    ''' Dummy implementation of a transformer that only checks for consistent shape of input '''
+    """ Dummy implementation of a transformer that only checks for consistent shape of input """
 
     def fit(self, X):
-        ''' Fits nothing '''
+        """ Fits nothing """
         X = self.check_X(X)
         return self
 
     def transform(self, X):
-        ''' Pass-through '''
+        """ Pass-through """
         X = self.check_X(X)
         # Reshape as vector if input was vector
-        if self.input_is_vector_: X = X[0]
+        if self.input_is_vector_:
+            X = X[0]
         return X
 
     def inverse_transform(self, X):
-        ''' Pass-through '''
-        self.check_attributes('input_is_vector_')
+        """ Pass-through """
+        self.check_attributes("input_is_vector_")
         X = self.check_X(X, ensure_shape=False, ensure_dtype=False)
         # Reshape as vector if input was vector
-        if self.input_is_vector_: X = X[0]
+        if self.input_is_vector_:
+            X = X[0]
         return X
 
     def on_input_shape_changed(self, change_map: ChangeMap):

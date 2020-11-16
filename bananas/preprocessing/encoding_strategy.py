@@ -1,7 +1,8 @@
 from enum import Enum, auto
 
+
 class EncodingStrategy(Enum):
-    ''' Encoding strategy enum '''
+    """ Encoding strategy enum """
 
     # Automatically select based on number of classes
     AUTO = auto()

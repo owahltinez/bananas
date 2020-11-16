@@ -1,4 +1,4 @@
-''' Adaptation of multiple transformers to handle N-dimensional data instead of only 2D '''
+""" Adaptation of multiple transformers to handle N-dimensional data instead of only 2D """
 
 import warnings
 from typing import Iterable, Set
@@ -11,7 +11,7 @@ from .base import ColumnHandlingTransformer
 
 
 class LabelEncoder(ColumnHandlingTransformer):
-    '''
+    """
     Encoding of features is a crucial task in any fully-fledged ML framework. this library implements
     two feature encoders: `LabelEncoder` and `OneHotEncoder`. The `LabelEncoder` transforms the
     requested features into ordinal integers. Consider the following example:
@@ -34,17 +34,17 @@ class LabelEncoder(ColumnHandlingTransformer):
     encoder.fit(word_vector).transform(word_vector)
     # Output: array([1, 0, 0, 2, 1, 1, 1, 2], dtype=uint8)
     ```
-    '''
+    """
 
     def __init__(self, columns: (dict, Set[int]) = None, verbose: bool = False):
-        '''
+        """
         Parameters
         ----------
         columns : dict, Set[int]
             TODO
         verbose : bool
             TODO
-        '''
+        """
         super().__init__(columns=columns, verbose=verbose)
         for col, classes in self.columns_.items():
             # Ensure that each column contains at least an empty set
@@ -80,7 +80,8 @@ class LabelEncoder(ColumnHandlingTransformer):
 
             # Swap labels for their corresponding encoded index
             for idx, label in enumerate(classes):
-                if label is None: break
+                if label is None:
+                    break
                 arr[X[i] == label] = idx
 
             # Replace column in original data
@@ -90,12 +91,13 @@ class LabelEncoder(ColumnHandlingTransformer):
         X = [check_array(col) for col in X]
 
         # Reshape as vector if input was vector.
-        if self.input_is_vector_: X = X[0]
+        if self.input_is_vector_:
+            X = X[0]
 
         return X
 
     def inverse_transform(self, X):
-        self.check_attributes('input_is_vector_')
+        self.check_attributes("input_is_vector_")
         X = self.check_X(X, ensure_shape=False, ensure_dtype=False)
 
         for idx1, classes in self.columns_.items():
@@ -113,7 +115,8 @@ class LabelEncoder(ColumnHandlingTransformer):
         X = [check_array(col) for col in X]
 
         # Reshape as vector if input was vector
-        if self.input_is_vector_: X = X[0]
+        if self.input_is_vector_:
+            X = X[0]
 
         return X
 
@@ -126,7 +129,7 @@ class LabelEncoder(ColumnHandlingTransformer):
 
 
 class OneHotEncoder(LabelEncoder):
-    '''
+    """
     The `OneHotEncoder` extends the label encoder and outputs a one-hot vector for each sample. We
     must keep in mind that this library uses a **column-first format**, so the output will be a list
     of features representing a set of each of the one-or-zero elements in the one-hot vector for
@@ -161,9 +164,10 @@ class OneHotEncoder(LabelEncoder):
 
     Note that the last output feature is zero for all samples, this is because the expected word
     (watermelon) is never encountered.
-    '''
+    """
+
     def __init__(self, columns: (dict, Iterable[int]) = None, verbose: bool = False):
-        '''
+        """
         If classes are not known before hand, a dict of {column: [None, None, None...]} can be
         passed as placeholders.
 
@@ -173,7 +177,7 @@ class OneHotEncoder(LabelEncoder):
             TODO
         verbose : bool
             TODO
-        '''
+        """
         super().__init__(columns=columns, verbose=verbose)
 
         # Initialize working variables
@@ -189,13 +193,14 @@ class OneHotEncoder(LabelEncoder):
             vec[num] = 1
         except IndexError:
             if not self.warned_once_:
-                warnings.warn('Unable to vectorize unseen class %d' % num)
+                warnings.warn("Unable to vectorize unseen class %d" % num)
                 self.warned_once_ = True
         return tuple(vec)
 
     def _vec_to_num(self, vec):
         for idx, val in enumerate(vec):
-            if val == 1: return idx
+            if val == 1:
+                return idx
         return -1
 
     def fit(self, X: Iterable[Iterable]):
@@ -235,9 +240,9 @@ class OneHotEncoder(LabelEncoder):
         self.output_len_ = len(X) + sum(map(len, self.columns_.values())) - len(self.columns_)
 
         if self.output_changed_pending_:
-            self.print('Triggered output change, encoding:')
+            self.print("Triggered output change, encoding:")
             for idx, classes in self.columns_.items():
-                self.print('Column: %d\tVector length: %d' % (idx, len(classes)))
+                self.print("Column: %d\tVector length: %d" % (idx, len(classes)))
 
         # If there are pending changes, fire event now
         while self.output_changed_pending_:
@@ -255,7 +260,8 @@ class OneHotEncoder(LabelEncoder):
             # Otherwise breakout into encoded matrix. E.g. [[0 0 1] [0 1 0] [1 0 0] [0 1 0] ...]
             self.warned_once_ = False
             arr_of_vecs = numpy.array(
-                list(map(lambda x, idx=i: self._num_to_vec(x, idx), col)), dtype=DTYPE_UINT8[0])
+                list(map(lambda x, idx=i: self._num_to_vec(x, idx), col)), dtype=DTYPE_UINT8[0]
+            )
 
             # Copy each column of the matrix to final output
             for j in range(arr_of_vecs.shape[1]):
@@ -265,18 +271,24 @@ class OneHotEncoder(LabelEncoder):
         X = [check_array(col) for col in output]
 
         # Reshape as vector if input was vector
-        if self.input_is_vector_ and len(X) == 1: X = X[0]
+        if self.input_is_vector_ and len(X) == 1:
+            X = X[0]
         return X
 
     def inverse_transform(self, X: Iterable[Iterable]):
-        self.check_attributes('input_is_vector_')
+        self.check_attributes("input_is_vector_")
         X = self.check_X(X, ensure_shape=False, ensure_dtype=False)
 
         # Compute the total number of expected columns
-        max_idx = len(self.input_shape_) + sum(
-            [len(labels) for labels in self.columns_.values()]) - len(self.columns_)
-        assert len(X) == max_idx, \
-            'Unexpected number of columns found. Expected: %d, found: %d' % (max_idx, len(X))
+        max_idx = (
+            len(self.input_shape_)
+            + sum([len(labels) for labels in self.columns_.values()])
+            - len(self.columns_)
+        )
+        assert len(X) == max_idx, "Unexpected number of columns found. Expected: %d, found: %d" % (
+            max_idx,
+            len(X),
+        )
 
         # Compute columns that are result of one-hot encoding breakout
         output = []
@@ -294,7 +306,8 @@ class OneHotEncoder(LabelEncoder):
             # Otherwise, inverse the encoding operation and add a single column to output
             num_labels = len(self.columns_[idx_out])
             arr_of_vecs = numpy.array(
-                transpose_array([X[idx_in + j] for j in range(num_labels)]), dtype=DTYPE_UINT8[0])
+                transpose_array([X[idx_in + j] for j in range(num_labels)]), dtype=DTYPE_UINT8[0]
+            )
             # TODO: vectorize this operation for performance
             output.append(check_array([self._vec_to_num(vec) for vec in arr_of_vecs]))
 
@@ -308,14 +321,15 @@ class OneHotEncoder(LabelEncoder):
         return output
 
     def on_input_shape_changed(self, change_map: ChangeMap):
-        self.print('Input changed: %r' % change_map)
+        self.print("Input changed: %r" % change_map)
 
         # Early exit: fresh transformer, just propagate changes downstream
         if not self.output_len_:
-            self.print('Fresh transformer, passing change map through')
+            self.print("Fresh transformer, passing change map through")
             self.on_output_shape_changed(change_map)
             self._input_change_column_adapter(
-                change_map, ['columns_', 'input_dtype_', 'input_shape_', 'last_known_classes_'])
+                change_map, ["columns_", "input_dtype_", "input_shape_", "last_known_classes_"]
+            )
             return
 
         # First reverse changes previously sent downstream
@@ -340,9 +354,11 @@ class OneHotEncoder(LabelEncoder):
 
         # Adapt feature changes by parent and by our own attributes
         self._input_change_column_adapter(
-            change_map, ['columns_', 'input_dtype_', 'input_shape_', 'last_known_classes_'])
+            change_map, ["columns_", "input_dtype_", "input_shape_", "last_known_classes_"]
+        )
 
         # Send adapted output change
         change_map_adapted = ChangeMap(
-            change_map.output_len, idx_del=self.columns_.keys(), idx_add=idx_add_2)
+            change_map.output_len, idx_del=self.columns_.keys(), idx_add=idx_add_2
+        )
         self.on_output_shape_changed(change_map_adapted)

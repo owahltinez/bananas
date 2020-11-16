@@ -7,12 +7,12 @@ from ..training.mixins import TrainableMixin
 from ..utils.arrays import check_array, shape_of_features
 from ..utils.constants import ARRAY_LIKE
 
-_ATTR_NAMED_ARGUMENTS_PREFIX = '_named_argument'
-''' Prefix used to store named arguments in an internal dictionary '''
+_ATTR_NAMED_ARGUMENTS_PREFIX = "_named_argument"
+""" Prefix used to store named arguments in an internal dictionary """
 
 
 class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
-    '''
+    """
     Base class for all learners. It provides many convenience functions that can be used by
     children classes such as `check_X` and `check_X_y`, and it provides a fundamental contract
     for how users are expected to train their machine learning models. It is inspired by SciKit and
@@ -27,7 +27,7 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
     list of input features (i.e. *columns*). This is in contrast to the more usual *sample-first* format
     where learners accept a list of samples. The rationale for this is explained in the [design
     principes](../#input-data-format) section of the intro docs.
-    '''
+    """
 
     def __init__(self, **kwargs):
 
@@ -38,12 +38,12 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
         self.input_is_vector_: bool = None
 
     def print(self, *msg, **kwargs):
-        ''' Print message to console only if in verbose mode '''
-        if getattr(self, 'verbose', False):
-            print('[%s]' % (self.__class__.__name__), *msg, **kwargs)
+        """ Print message to console only if in verbose mode """
+        if getattr(self, "verbose", False):
+            print("[%s]" % (self.__class__.__name__), *msg, **kwargs)
 
     def check_attributes(self, *attributes: str):
-        '''
+        """
         Makes sure that the provided attributes have been initialized. This method is expected
         to be used only in custom learner implementations.
 
@@ -51,14 +51,20 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
         ----------
         attributes : str
             Attributes to verify for initialization
-        '''
+        """
         assert all([getattr(self, attr, None) is not None for attr in attributes]), (
-            'Required attributes not initialized: %r' %
-            [attr for attr in attributes if getattr(self, attr, None) is None])
+            "Required attributes not initialized: %r"
+            % [attr for attr in attributes if getattr(self, attr, None) is None]
+        )
 
-    def check_X(self, X: Iterable[Iterable], ensure_2d: bool = True, ensure_shape: bool = True,
-                ensure_dtype: bool = True) -> Iterable:
-        '''
+    def check_X(
+        self,
+        X: Iterable[Iterable],
+        ensure_2d: bool = True,
+        ensure_shape: bool = True,
+        ensure_dtype: bool = True,
+    ) -> Iterable:
+        """
         Ensures that the input provided has a consistent shape and type with respect to previous
         calls to this method. It will also convert the input to the expected shape and type if
         necessary (and possible).
@@ -79,25 +85,28 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
         -------
         Iterable
             Converted input sample values after checking shape and types
-        '''
+        """
 
         # Convert vectors to list of vectors
         input_vector = not isinstance(X[0], ARRAY_LIKE)
-        if input_vector: X = [X]
+        if input_vector:
+            X = [X]
 
         # If we are enforcing dtype, then we should be checking array against previously seen
         # dtype for each column so we can cast columns into appropriate dtype. This ensures that the
         # dtype of each column will be consistent instead of trying to optimize it later on; for
         # example converting int-like arrays like [0. 1. 1. 0. ...] to int when dtype was float.
         check_array_opts = [{} for i in range(len(X))]
-        if ensure_dtype and hasattr(self, 'input_dtype_') and self.input_dtype_:
-            check_array_opts = [{'dtype': self.input_dtype_.get(i)} for i in range(len(X))]
+        if ensure_dtype and hasattr(self, "input_dtype_") and self.input_dtype_:
+            check_array_opts = [{"dtype": self.input_dtype_.get(i)} for i in range(len(X))]
 
         # Convert data into a list of arrays and make sure they are all of the same length
         X = [check_array(col, **check_array_opts[i]) for i, col in enumerate(X)]
         if not all([col.shape[0] == X[0].shape[0] for col in X[1:]]):
-            raise ValueError('Input features have inconsistent number of samples. Expected all to '
-                             'be %d, found %r' % (X[0].shape[0], [col.shape[0] for col in X]))
+            raise ValueError(
+                "Input features have inconsistent number of samples. Expected all to "
+                "be %d, found %r" % (X[0].shape[0], [col.shape[0] for col in X])
+            )
 
         # Extract the shape of each of the features
         input_shape = shape_of_features(X)
@@ -125,19 +134,24 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
         if ensure_dtype:
             # Check again to see if conversion was successful
             get_dtype = lambda i, fallback: self.input_dtype_.get(i, fallback) or fallback
-            if hasattr(self, 'input_dtype_') and self.input_dtype_ and \
-                    any([dtype != get_dtype(i, dtype) for i, dtype in input_dtype.items()]):
-                raise TypeError('Input dtypes changed. Expected %r, found %r' %
-                                (self.input_dtype_, input_dtype))
+            if (
+                hasattr(self, "input_dtype_")
+                and self.input_dtype_
+                and any([dtype != get_dtype(i, dtype) for i, dtype in input_dtype.items()])
+            ):
+                raise TypeError(
+                    "Input dtypes changed. Expected %r, found %r" % (self.input_dtype_, input_dtype)
+                )
             self.input_dtype_ = input_dtype
 
         # Reshape input back to vector if necessary
-        if not ensure_2d and input_vector: X = X[0]
+        if not ensure_2d and input_vector:
+            X = X[0]
 
         return X
 
     def check_X_y(self, X: Iterable[Iterable], y: Iterable) -> Tuple[Iterable, Iterable]:
-        '''
+        """
         Performs all the checks described in `check_X` for `X` and ensures that the argument `y` is
         an appropriately shaped and sized array.
 
@@ -156,12 +170,12 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
             Converted input sample values after checking shape and types
         y : Iterable
             Converted target sample values after checking shape and types
-        '''
+        """
         X, y = self.check_X(X), check_array(y)
         return X, y
 
     def apply_mixin(self, *mixins: type):
-        '''
+        """
         Applies the given mixins to this instance. This can be used, for example, to establish
         a learner as a classifier without having to create a dummy subclass. So the following are
         equivalent:
@@ -176,15 +190,16 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
         # Option 2: apply mixins
         learner_classifier = MyLearnerBaseClass().apply_mixin(BaseClassifier)
         ```
-        '''
+        """
         base_class = self.__class__
         base_class_name = self.__class__.__name__
         self.__class__ = type(base_class_name, (base_class, *mixins), {})
-        for mixin in mixins: mixin.__init__(self)
+        for mixin in mixins:
+            mixin.__init__(self)
         return self
 
     def predict(self, X: Iterable[Iterable]):  # pylint: disable=unused-argument
-        '''
+        """
         Outputs the learner's predicted target values for the provided input samples. **Input
         samples are  expected to be a list of columns**, so that each column represents a distinct
         feature. The output target values are in the form of a 1D list of values.
@@ -199,11 +214,11 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
         -------
         Iterable
             Predicted output values in the form of a 1D list of values
-        '''
+        """
         raise NotImplementedError()
 
     def score(self, X: Iterable[Iterable], y: Iterable) -> float:
-        '''
+        """
         Scores input against validation data. **Input samples are  expected to be a list of
         columns**, so that each column represents a distinct feature. The target values are expected
         to be in the form of a 1D list of values.
@@ -221,15 +236,15 @@ class Learner(InputChangeMixin, TrainableMixin, HyperParametersMixin):
         -------
         float
             Score of the predicted output with respect to the true output
-        '''
+        """
         raise NotImplementedError()
 
     def on_input_shape_changed(self, change_map: ChangeMap):
-        self._input_change_column_adapter(change_map, ['input_dtype_', 'input_shape_'])
+        self._input_change_column_adapter(change_map, ["input_dtype_", "input_shape_"])
 
 
 class SupervisedLearner(Learner):
-    '''
+    """
     Base class for a model implementing supervised learning. Fitting data to the model requires
     both input samples and sample targets -- also known as "true" labels in classification problems.
 
@@ -237,13 +252,13 @@ class SupervisedLearner(Learner):
     the `fit` function in a supervised learner takes two parameters:
     1. Feature set: column-first list of input features.
     2. Feature labels: 1D list of input labels.
-    '''
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def fit(self, X: Iterable[Iterable], y: Iterable) -> 'SupervisedLearner':
-        '''
+    def fit(self, X: Iterable[Iterable], y: Iterable) -> "SupervisedLearner":
+        """
         Fit input to model incrementally. Users are expected to call this method with mini-batches
         of data that will be fed to the underlying learner. **Input samples are  expected to be a
         list of columns**, so that each column represents a distinct feature. The target values are
@@ -262,22 +277,22 @@ class SupervisedLearner(Learner):
         -------
         Learner
             Instance of self
-        '''
+        """
         raise NotImplementedError()
 
 
 class UnsupervisedLearner(Learner):
-    '''
+    """
     Base class for a model implementing unsupervised learning. Unsupervised learners only take a
     single parameter in their `fit` function: a column-first list of input features. The canonical
     example of an unsupervised learning technique is clustering.
-    '''
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def fit(self, X: Iterable[Iterable]) -> 'UnsupervisedLearner':
-        '''
+    def fit(self, X: Iterable[Iterable]) -> "UnsupervisedLearner":
+        """
         Fit input to model incrementally. Users are expected to call this method with mini-batches
         of data that will be fed to the underlying learner. **Input samples are  expected to be a
         list of columns**, so that each column represents a distinct feature. The target values are
@@ -293,5 +308,5 @@ class UnsupervisedLearner(Learner):
         -------
         Learner
             Instance of self
-        '''
+        """
         raise NotImplementedError()

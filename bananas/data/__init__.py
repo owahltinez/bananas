@@ -1,4 +1,4 @@
-''' Data handling module '''
+""" Data handling module """
 
 from .datatype import DataType
 from .feature import Feature
