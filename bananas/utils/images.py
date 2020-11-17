@@ -5,12 +5,24 @@ import math
 from enum import Enum, auto
 from random import randint
 from typing import Tuple
-import numpy
+
+# Try to import numpy and PIL, but ignore errors to avoid forcing the dependency
+try:
+    import numpy
+    from numpy import ndarray as NDArrayType
+except ImportError:
+    from typing import Any as NDArrayType
+
+try:
+    from PIL import Image, ImageOps
+    from PIL import Image as ImageType
+except ImportError:
+    from typing import Any as ImageType
 
 
 def normalize(
-    img: numpy.ndarray, means: Tuple[float] = None, stdevs: Tuple[float] = None
-) -> numpy.ndarray:
+    img: NDArrayType, means: Tuple[float] = None, stdevs: Tuple[float] = None
+) -> NDArrayType:
     """ Normalize an image by performing `(array - mean) / stdev` to each channel. """
     if means is None:
         means = [arr.mean() for arr in img]
@@ -22,7 +34,7 @@ def normalize(
     )
 
 
-def pil_to_ndarray(img) -> numpy.ndarray:
+def image_to_ndarray(img: ImageType) -> NDArrayType:
     """ Converts a PIL.Image type to numpy.ndarray. """
     # Convert into ndarray type
     arr = numpy.array(img).astype(numpy.uint8)
@@ -35,9 +47,8 @@ def pil_to_ndarray(img) -> numpy.ndarray:
     return numpy.array([arr[:, :, i] for i in range(arr.shape[2])])
 
 
-def ndarray_to_pil(img: numpy.ndarray):
+def ndarray_to_image(img: NDArrayType) -> ImageType:
     """ Converts a numpy.ndarray type to a PIL.Image type. """
-    from PIL import Image
 
     assert img.dtype == numpy.uint8, "Array must be of uint8 dtype"
 
@@ -49,15 +60,40 @@ def ndarray_to_pil(img: numpy.ndarray):
     img_ = numpy.zeros((img.shape[1], img.shape[2], img.shape[0]), dtype=numpy.uint8)
     for channel in range(img.shape[0]):
         img_[:, :, channel] = img[channel, :, :]
+
     return Image.fromarray(img_)
 
 
-def open_image(path: str, convert: str = None, channels: bool = False, uint8: bool = True):
+def _exif_rotate(image: ImageType) -> ImageType:
+    """
+    https://github.com/python-pillow/Pillow/issues/4346#issuecomment-575049324
+    """
+
+    # Extract image EXIF data
+    exif = image.getexif()
+
+    # Remove all EXIF tags except rotation information to work around PIL bugs
+    for k in exif.keys():
+        if k != 0x0112:
+            exif[k] = None
+            del exif[k]
+
+    # Put the new EXIF object in the original image
+    new_exif = exif.tobytes()
+    image.info["exif"] = new_exif
+
+    # Rotate the image and return
+    return ImageOps.exif_transpose(image)
+
+
+def open_image(
+    path: str, convert: str = None, channels: bool = False, uint8: bool = True
+) -> NDArrayType:
     """ Opens an image given its path. Fails if PIL package is not installed. """
-    from PIL import Image
 
     # Open the image using PIL
     img = Image.open(path)
+    img = _exif_rotate(img)
 
     # Convert to a different colorspace if needed
     if convert:
@@ -66,7 +102,7 @@ def open_image(path: str, convert: str = None, channels: bool = False, uint8: bo
         img = img_
 
     # Convert image to numpy array
-    img_ = pil_to_ndarray(img)
+    img_ = image_to_ndarray(img)
     img.close()
     img = img_
 
@@ -81,7 +117,7 @@ def open_image(path: str, convert: str = None, channels: bool = False, uint8: bo
     return img
 
 
-def _get_image_size(img: numpy.ndarray):
+def _get_image_size(img: NDArrayType):
     """ Returns the width and height of the image for the 2D and 3D case """
     if img.ndim == 2:
         return tuple(img.shape)
@@ -90,7 +126,7 @@ def _get_image_size(img: numpy.ndarray):
     raise ValueError("Input image has more than 3 dimensions. Shape found: %r" % img.shape)
 
 
-def _set_image_pixel(img: numpy.ndarray, x: int, y: int, value: int):
+def _set_image_pixel(img: NDArrayType, x: int, y: int, value: int):
     if img.ndim == 2:
         img[y, x] = value
         return
@@ -100,7 +136,7 @@ def _set_image_pixel(img: numpy.ndarray, x: int, y: int, value: int):
     raise ValueError("Input image has more than 3 dimensions. Shape found: %r" % img.shape)
 
 
-def _get_image_pixel(img: numpy.ndarray, x: int, y: int):
+def _get_image_pixel(img: NDArrayType, x: int, y: int):
     if img.ndim == 2:
         return img[y, x]
     if img.ndim == 3:
@@ -108,7 +144,7 @@ def _get_image_pixel(img: numpy.ndarray, x: int, y: int):
     raise ValueError("Input image has more than 3 dimensions. Shape found: %r" % img.shape)
 
 
-def _get_image_region(img: numpy.ndarray, x0: int, x1: int, y0: int, y1: int):
+def _get_image_region(img: NDArrayType, x0: int, x1: int, y0: int, y1: int):
     if img.ndim == 2:
         return img[y0:y1, x0:x1]
     if img.ndim == 3:
@@ -154,7 +190,7 @@ def _compute_crop_region(
         return (crop_y_0, crop_x_0, crop_y_1, crop_x_1)
 
 
-def crop(img: numpy.ndarray, height: int, width: int, method: CropStrategy = CropStrategy.CENTER):
+def crop(img: NDArrayType, height: int, width: int, method: CropStrategy = CropStrategy.CENTER):
     """
     Crops an image using the given strategy. Image is automatically resized if necessary.
     """
@@ -177,7 +213,7 @@ class ScalingMethod(Enum):
     NEAREST_NEIGHBOR = auto()
 
 
-def _scale_nearest_neighbor(img: numpy.ndarray, height: int, width: int):
+def _scale_nearest_neighbor(img: NDArrayType, height: int, width: int):
     img_out = None
     if img.ndim == 2:
         img_out = numpy.zeros((height, width), dtype=img.dtype)
@@ -190,16 +226,15 @@ def _scale_nearest_neighbor(img: numpy.ndarray, height: int, width: int):
             src_y = min(img_h - 1, round(float(y) / float(height) * float(img_h)))
             src_x = min(img_w - 1, round(float(x) / float(width) * float(img_w)))
             _set_image_pixel(img_out, x, y, _get_image_pixel(img, src_y, src_x))
-            # img_out[:, y, x] = img[:, src_y, src_x]
     return img_out
 
 
 def scale(
-    img: numpy.ndarray,
+    img: NDArrayType,
     height: int,
     width: int,
     method: ScalingMethod = ScalingMethod.NEAREST_NEIGHBOR,
-) -> numpy.ndarray:
+) -> NDArrayType:
     """ Scales an image using the provided method, e.g. nearest neighbor. """
 
     if method == ScalingMethod.NEAREST_NEIGHBOR:
@@ -209,13 +244,12 @@ def scale(
 
 
 def rotate(
-    img: numpy.ndarray, rotation_degrees: int, fill_color_rgb: Tuple[int, int, int] = (255,) * 3
-) -> numpy.ndarray:
+    img: NDArrayType, rotation_degrees: int, fill_color_rgb: Tuple[int, int, int] = (255,) * 3
+) -> NDArrayType:
     """ Rotates an image by `rotation_degrees` and fills the corners with `fill_color_rgb` """
-    from PIL import Image
 
     # Original image in PIL.Image format
-    im_orig = ndarray_to_pil(img)
+    im_orig = ndarray_to_image(img)
     # Filled image the same size as the original image
     im_filled_orig = Image.new("RGBA", im_orig.size, tuple([*fill_color_rgb, 255]))
     # Filled image with rotation applied
@@ -225,18 +259,18 @@ def rotate(
     # Create a composite image using the alpha layer of im_white_rotated as a mask
     im_output = Image.composite(im_orig.rotate(rotation_degrees), im_filled_post, im_filled_rotated)
     # Output image with same color mode as original
-    return pil_to_ndarray(im_output.convert(im_orig.mode))
+    return image_to_ndarray(im_output.convert(im_orig.mode))
 
 
-def rgb_to_grayscale(img: numpy.ndarray):
+def rgb_to_grayscale(img: NDArrayType) -> NDArrayType:
     """ Converts an image with 3 channels from RGB to grayscale color space """
     assert img.ndim == 3, "Image expected to have 3 channels for RGB"
     return img[:, :, 0] * 0.2126 + img[:, :, 0] * 0.7152 + img[:, :, 0] * 0.0722
 
 
 def resize_canvas(
-    img: numpy.ndarray, height: int, width: int, fill_color_rgb: Tuple[int, int, int] = (255,) * 3
-) -> numpy.ndarray:
+    img: NDArrayType, height: int, width: int, fill_color_rgb: Tuple[int, int, int] = (255,) * 3
+) -> NDArrayType:
     """ Resizes the canvas of an image, cropping the image if necessary """
     if height < img.shape[0]:
         img = crop(img, height, img.shape[1], CropStrategy.TOP_LEFT)
