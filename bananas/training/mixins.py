@@ -100,8 +100,8 @@ class TrainableMixin(object):
 
             # Print progress at 1, 2, 3, ..., 10, 20, 30, ..., 100, 200, 300, ..., 1000, 2000, ...
             if any([idx < (10 ** (n + 1)) and (idx + 1) % (10 ** n) == 0 for n in range(max_n)]):
-                loop_log = "Training iteration %d/%d." % (idx + 1, max_steps)
-                test_log = "Current test score: %.03f." % (step_data.running_score)
+                loop_log = f"Training iteration {idx + 1}/{max_steps}."
+                test_log = f"Current test score: {step_data.running_score or 0:.03f}."
                 self.print("%s %s" % (loop_log, test_log))
 
             # Pull a sample for training and fit the estimator with it
@@ -122,7 +122,7 @@ class TrainableMixin(object):
                 progress_bar.update()
 
             # Update best score if appropriate
-            if step_data.running_score > step_data.best_score:
+            if step_data.best_score is None or step_data.running_score > step_data.best_score:
                 step_data.best_iteration = idx
                 step_data.best_score = step_data.running_score
 
@@ -154,7 +154,7 @@ class TrainableMixin(object):
             progress_bar.close()
 
         # Update the training time and return history
-        history.time_millis = monotonic() - train_start
+        history.time_seconds = monotonic() - train_start
         return history
 
     # pylint: enable=too-many-arguments

@@ -13,10 +13,12 @@ except ImportError:
 
 # Import tqdm and workaround some of their issues
 import tqdm
+tqdm_is_notebook = False
 
 try:
     __IPYTHON__
     from tqdm.notebook import tqdm as tqdm_
+    tqdm_is_notebook = True
 except NameError:
     from tqdm import tqdm as tqdm_
 

@@ -9,7 +9,7 @@ from threading import Lock
 from ..core.learner import Learner
 from ..training.mixins import TrainableMixin
 from ..training.train_history import TrainHistory
-from ..utils import tqdm_
+from ..utils import tqdm_, tqdm_is_notebook
 
 
 class _MetaLearner(Learner, TrainableMixin):
@@ -33,7 +33,7 @@ class _MetaLearner(Learner, TrainableMixin):
         self._lock = Lock()
         self._scores_cache = {}
         self._learners_cache: Dict[str, Learner] = {}
-        self.best_score_: float = 0.0
+        self.best_score_: float = None
         self.best_learner_: Learner = None
         self.history_: Dict[Learner, TrainHistory] = {}
 
@@ -47,7 +47,7 @@ class _MetaLearner(Learner, TrainableMixin):
         """ Fits data for all learners by calling `fit()` """
         for learner in self._iter_learners():
             learner.fit(X, y)
-        if getattr(self, "best_learner_", None) is None:
+        if self.best_learner_ is None:
             self.best_learner_ = next(self._iter_learners())
         return self
 
@@ -63,7 +63,7 @@ class _MetaLearner(Learner, TrainableMixin):
         for learner, score in self.score_all(X, y=y):
             self._scores_cache[learner] = score
 
-            if not self.best_score_ or score > self.best_score_:
+            if self.best_score_ is None or score > self.best_score_:
                 self.best_score_ = score
                 self.best_learner_ = learner
 
@@ -81,10 +81,11 @@ class _MetaLearner(Learner, TrainableMixin):
 
     def _train_worker(self, *train_args, **train_kwargs):
         # Early exit: if goal score has been reached by another learner before us
-        if self.best_score_ > 0.0 and self.best_score_ >= train_kwargs.get("max_score", 1):
+        if self.best_score_ is not None and self.best_score_ >= train_kwargs.get("max_score", 1):
             return
 
-        # Introduce a small wait time to work around threading issues with tqdm
+        # Introduce a small wait time to work around threading issues with tqdm which prevent the
+        # progress bar from being created. This wait only affects each learner once.
         if train_kwargs.get("progress"):
             sleep(0.1)
 
@@ -100,7 +101,7 @@ class _MetaLearner(Learner, TrainableMixin):
             self.history_[learner] = history
 
             # Update best learner
-            if learner_score > self.best_score_:
+            if self.best_score_ is None or learner_score > self.best_score_:
                 self.best_learner_ = learner
                 self.best_score_ = learner_score
 

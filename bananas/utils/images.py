@@ -6,7 +6,7 @@ from enum import Enum, auto
 from random import randint
 from typing import Tuple
 
-# Try to import numpy and PIL, but ignore errors to avoid forcing the dependency
+# Try to import numpy and PIL, but ignore errors to avoid forcing the dependency on users
 try:
     import numpy
     from numpy import ndarray as NDArrayType
@@ -87,7 +87,7 @@ def _exif_rotate(image: ImageType) -> ImageType:
 
 
 def open_image(
-    path: str, convert: str = None, channels: bool = False, uint8: bool = True
+    path: str, convert: str = None, channels: bool = False, uint8: bool = False
 ) -> NDArrayType:
     """ Opens an image given its path. Fails if PIL package is not installed. """
 
